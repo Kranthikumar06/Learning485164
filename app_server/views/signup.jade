@@ -1,0 +1,30 @@
+extends layout
+
+block content
+  .navbar
+    .logo-container
+      div
+        span Secure
+        span Campus
+  .content
+    .login-card
+      h2 Sign Up for an Account
+      form(action="/signup", method="post")
+        .input-group
+          label(for="email") Email Address
+          input(type="email", id="email", name="email", placeholder="Enter your email", required)
+        .input-group
+          label(for="password") Password
+          input(type="password", id="password", name="password", placeholder="Enter your password", required)
+        .input-group
+          label(for="confirm_password") Confirm Password
+          input(type="password", id="confirm_password", name="confirm_password", placeholder="Confirm your password", required)
+        button(type="submit", class="btn")
+          span Sign Up
+        .links
+          a(href="/signin") Already have an account? Sign In
+  footer
+    p © 2025 Secure My Campus | 
+      a(href="#") Privacy Policy
+      |  | 
+      a(href="#") Help Center
