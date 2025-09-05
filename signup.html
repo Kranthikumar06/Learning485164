@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure My Campus - Sign Up</title>
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #e3f2fd, #e1bee7);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Navbar */
+    .navbar {
+      width: 100%;
+      background: #fff;
+      padding: 12px 40px;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 40px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+    }
+    .logo-container {
+      display: flex;
+      align-items: center;
+    }
+    .logo-container img {
+      width: 70px;
+      height: auto;
+    }
+    .logo-container div {
+      display: flex;
+      flex-direction: column;
+      margin-left: 12px;
+    }
+    .logo-container div span:first-child {
+      font-size: 22px;
+      font-weight: bold;
+      color: #007bff;
+    }
+    .logo-container div span:last-child {
+      font-size: 16px;
+      color: #333;
+      letter-spacing: 1px;
+    }
+
+    /* Nav Links */
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: #007bff;
+      font-size: 15px;
+      padding: 8px 16px;
+      border-radius: 24px;
+      transition: color 0.3s, box-shadow 0.4s, background 0.4s;
+    }
+    .nav-links a:hover {
+      color: #fff;
+      background: linear-gradient(90deg, #e1bee7 0%, #4a90e2 100%);
+      box-shadow:
+        0 0 16px 0 rgba(225,190,231,0.35),
+        0 0 32px 0 rgba(74,144,226,0.18),
+        0 0 48px 0 rgba(142,36,170,0.10);
+      transform: translateY(-2px) scale(1.08);
+    }
+
+    /* Center Content */
+    .content {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-top: 100px;
+    }
+
+    /* Signup Card */
+    .signup-card {
+      background: #fff;
+      padding: 40px 35px;
+      border-radius: 20px;
+      width: 400px;
+      text-align: center;
+      transition: transform 0.3s ease;
+      border: 2px solid #e1bee7;
+      box-shadow:
+        0 0 24px 0 rgba(225,190,231,0.18),
+        0 0 48px 0 rgba(74,144,226,0.10);
+    }
+    .signup-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+    }
+    .signup-card h2 {
+      margin-bottom: 25px;
+      font-size: 24px;
+      color: #333;
+    }
+
+    /* Input Fields */
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .input-group label {
+      display: block;
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 6px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      transition: 0.3s ease;
+    }
+    .input-group input:focus {
+      border-color: #4a90e2;
+      box-shadow: 0 0 10px rgba(74,144,226,0.4);
+      outline: none;
+    }
+
+    /* Button */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(45deg, #4a90e2, #007bff);
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.5s ease;
+      margin-top: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 200%;
+      height: 100%;
+      background: linear-gradient(120deg, #007bff, #00c6ff, #007bff);
+      transition: all 0.5s ease;
+      z-index: 0;
+    }
+    .btn:hover::before {
+      left: 0;
+    }
+    .btn span {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Links */
+    .links {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    .links a {
+      color: #007bff;
+      text-decoration: none;
+      margin: 0 10px;
+      transition: color 0.3s ease;
+    }
+    .links a:hover {
+      color: #0056b3;
+      text-decoration: underline;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: #555;
+    }
+    footer a {
+      color: #007bff;
+      text-decoration: none;
+      margin: 0 5px;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="logo-container">
+      <img src="Campus.png" alt="Secure Campus Logo">
+      <div>
+        <span>Secure</span>
+        <span>Campus</span>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="#">Home</a>
+      <a href="#">Complaint Box</a>
+      <a href="#">Lost and Found</a>
+      <a href="#">About</a>
+      <a href="#">Support</a>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <div class="signup-card">
+      <h2>Create Your Account</h2>
+      <!-- ✅ added id="signupForm" -->
+      <form id="signupForm">
+        <div class="input-group">
+          <label for="fullname">User Name</label>
+          <input type="text" id="fullname" name="fullname" placeholder="Enter your full name" required>
+        </div>
+        <div class="input-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" required>
+        </div>
+        
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+        <div class="input-group">
+          <label for="confirm-password">Confirm Password</label>
+          <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
+        </div>
+        <button type="submit" class="btn"><span>Sign Up</span></button>
+      </form>
+      <div class="links">
+        <p>Already have an account? <a href="signin.html">Login</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 Secure My Campus | <a href="#">Privacy Policy</a> | <a href="#">Help Center</a></p>
+  </footer>
+
+<script>
+  // Save signup details in localStorage
+  document.getElementById("signupForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirm-password").value;
+
+    if (password !== confirmPassword) {
+      alert("❌ Passwords do not match!");
+      return;
+    }
+
+    localStorage.setItem("email", email);
+    localStorage.setItem("password", password);
+
+    alert("✅ Sign Up Successful! Please login now.");
+    window.location.href = "signin.html";
+  });
+</script>
+
+</body>
+</html>

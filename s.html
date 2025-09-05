@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In / Sign Up</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      /* background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); */
+    }
+
+    .container {
+      width: 1000px;
+      height: 600px;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .form-container {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40px;
+      transition: all 0.6s ease-in-out;
+    }
+
+    .form-container form {
+      width: 100%;
+      max-width: 350px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #fdfdfd;
+      padding: 35px;
+      border-radius: 16px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    }
+
+    .form-container h2 {
+      margin-bottom: 20px;
+      font-size: 28px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .social-login {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .social-btn {
+      width: 45px;
+      height: 45px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 18px;
+      color: #fff;
+      transition: transform 0.3s;
+    }
+    .social-btn:hover { transform: scale(1.1); }
+
+    /* Redesigned colors for social buttons */
+    .google { 
+      background: linear-gradient(135deg, #ff416c, #ff4b2b); 
+    }
+    .linkedin { 
+      background: linear-gradient(135deg, #0072ff, #00c6ff);
+    }
+
+    .input-box {
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .input-box input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+      font-size: 14px;
+      transition: border 0.3s, box-shadow 0.3s;
+    }
+
+    .input-box input:focus {
+      border: 1px solid #36d1dc;
+      box-shadow: 0 0 6px rgba(54,209,220,0.4);
+    }
+
+    .options {
+      margin-bottom: 20px;
+      font-size: 14px;
+      width: 100%;
+      text-align: right;
+    }
+
+    .options a {
+      color: #2575fc;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #36d1dc, #5b86e5);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    /* Sign In form */
+    .signin-container { 
+      left: 0; 
+      z-index: 2; 
+    }
+
+    /* Sign Up form (hidden by default on the right) */
+    .signup-container { 
+      left: 100%; 
+      z-index: 1; 
+      opacity: 0;
+    }
+
+    /* When active → show sign up, hide sign in */
+    .container.right-panel-active .signin-container {
+      transform: translateX(-100%);
+      opacity: 0;
+      z-index: 1;
+    }
+
+    .container.right-panel-active .signup-container {
+      transform: translateX(-100%);
+      opacity: 1;
+      z-index: 2;
+    }
+
+    /* Overlay container */
+    .overlay-container {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 50%;
+      height: 101%;
+      overflow: hidden;
+      transition: transform 0.6s ease-in-out;
+      z-index: 100;
+    }
+
+    .overlay {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      position: relative;
+      left: -100%;
+      height: 100%;
+      width: 200%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.6s ease-in-out;
+    }
+
+    .overlay-panel {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 0 40px;
+      text-align: center;
+      top: 0;
+      height: 100%;
+      width: 50%;
+      transition: transform 0.6s ease-in-out;
+    }
+
+    .overlay-panel h2 {
+      font-size: 26px;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .overlay-panel p {
+      margin-bottom: 20px;
+      max-width: 300px;
+      font-size: 14px;
+    }
+
+    .overlay-panel button {
+      padding: 12px 25px;
+      background: #fff;
+      color: #764ba2;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+
+    .overlay-panel button:hover {
+      background: #f0f0f0;
+    }
+
+    .overlay-left { left: 0; }
+    .overlay-right { right: 0; }
+
+    .container.right-panel-active .overlay-container {
+      transform: translateX(-100%);
+    }
+
+    .container.right-panel-active .overlay {
+      transform: translateX(50%);
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="container">
+    <!-- Sign In -->
+    <div class="form-container signin-container">
+      <form class="signin-form" autocomplete="off">
+        <h2>Sign In</h2>
+        <div class="social-login">
+          <button type="button" class="social-btn google">G</button>
+          <button type="button" class="social-btn linkedin">in</button>
+        </div>
+        <div class="input-box"><input type="email" placeholder="Email" required></div>
+        <div class="input-box"><input type="password" placeholder="Password" required></div>
+        <div class="options">
+          <a href="#">Forgot your password?</a>
+        </div>
+        <button type="submit" class="btn">Sign In</button>
+      </form>
+    </div>
+
+    <!-- Sign Up -->
+    <div class="form-container signup-container">
+      <form class="signup-form" autocomplete="off">
+        <h2>Sign Up</h2>
+        <div class="social-login">
+          <button type="button" class="social-btn google">G</button>
+          <button type="button" class="social-btn linkedin">in</button>
+        </div>
+        <div class="input-box"><input type="text" placeholder="Full Name" required></div>
+        <div class="input-box"><input type="email" placeholder="Email" required></div>
+        <div class="input-box"><input type="password" placeholder="Password" required></div>
+        <button type="submit" class="btn">Sign Up</button>
+      </form>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay-container">
+      <div class="overlay">
+        <div class="overlay-panel overlay-left">
+          <h2>Welcome Back!</h2>
+          <p>To keep connected with us please login with your personal details</p>
+          <button id="signInBtn">Sign In</button>
+        </div>
+        <div class="overlay-panel overlay-right">
+          <h2>Hello, Friend!</h2>
+          <p>Register with your personal details to start your journey with us</p>
+          <button id="signUpBtn">Sign Up</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const container = document.getElementById('container');
+    const signUpBtn = document.getElementById('signUpBtn');
+    const signInBtn = document.getElementById('signInBtn');
+
+    signUpBtn.addEventListener('click', () => {
+      container.classList.add('right-panel-active');
+    });
+
+    signInBtn.addEventListener('click', () => {
+      container.classList.remove('right-panel-active');
+    });
+
+    // Prevent form submission for demo
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', e => e.preventDefault());
+    });
+  </script>
+</body>
+</html>
