@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure My Campus - Sign Up</title>
+  <link rel="stylesheet" href="signup.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="logo-container">
+      <img src="Campus.png" alt="Secure Campus Logo">
+      <div>
+        <span>Secure</span>
+        <span>Campus</span>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="#">Home</a>
+      <a href="#">Complaint Box</a>
+      <a href="#">Lost and Found</a>
+      <a href="#">About</a>
+      <a href="#">Support</a>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <div class="signup-card">
+      <h2>Create Your Account</h2>
+      <!-- ✅ added id="signupForm" -->
+      <form id="signupForm">
+        <div class="input-group">
+          <label for="fullname">User Name</label>
+          <input type="text" id="fullname" name="fullname" placeholder="Enter your full name" required>
+        </div>
+        <div class="input-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" required>
+        </div>
+        
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+        <div class="input-group">
+          <label for="confirm-password">Confirm Password</label>
+          <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
+        </div>
+        <button type="submit" class="btn"><span>Sign Up</span></button>
+      </form>
+      <div class="links">
+        <p>Already have an account? <a href="signin.html">Login</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 Secure My Campus | <a href="#">Privacy Policy</a> | <a href="#">Help Center</a></p>
+  </footer>
+
+<link rel="javascript" href="signup.js">
+
+</body>
+</html>

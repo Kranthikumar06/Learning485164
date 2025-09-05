@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure My Campus - Complaint Box</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="complaint_box.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="navbar-left">
+      <div class="logo-container">
+        <img src="Campus.png" alt="Secure Campus Logo">
+        <div>
+          <span>Secure</span>
+          <span>Campus</span>
+        </div>
+      </div>
+      <div class="nav-links">
+        <a href="#">Home</a>
+        <a href="#">Complaint Box</a>
+        <a href="#">Lost and Found</a>
+        <a href="#">About</a>
+        <a href="#">Support</a>
+      </div>
+    </div>
+    <div class="auth-buttons">
+      <a href="#" class="signin">Sign In</a>
+      <a href="#" class="signup">Sign Up</a>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <div class="form-container">
+      <h2>Complaint Box</h2>
+      <form>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" name="phone" required>
+
+        <label for="date">Date</label>
+        <input type="date" id="date" name="date" required>
+
+        <label for="type">Complaint Type</label>
+        <select id="type" name="type" required>
+          <option value="">-- Select Complaint Type --</option>
+          <option value="harassment">Harassment</option>
+          <option value="food">Food Issue</option>
+          <option value="lost">Lost & Found</option>
+          <option value="hostel">Hostel Issue</option>
+        </select>
+
+        <label for="desc">Description</label>
+        <textarea id="desc" name="desc" required></textarea>
+
+        <label for="photos">Upload Photos (at least 2)</label>
+        <input type="file" id="photos" name="photos" accept="image/*" multiple required>
+
+        <button type="submit" class="submit-btn"><span>Submit Complaint</span></button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 Secure My Campus | <a href="#">Privacy Policy</a> | <a href="#">Help Center</a></p>
+  </footer>
+
+</body>
+</html>
