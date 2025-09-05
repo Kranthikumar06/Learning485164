@@ -120,6 +120,7 @@
      align-items: center;
      padding-top: 100px;
      padding-bottom: 40px;
+     margin-top: 20px;
  }
 
  /* Complaint Box Card */
@@ -144,7 +145,7 @@
      text-align: center;
      color: #222;
      margin-bottom: 25px;
-     font-size: 32px;
+     font-size: 25px;
      font-weight: 700;
      font-family: 'Montserrat', 'Poppins', Arial, sans-serif;
      /* Changed font */

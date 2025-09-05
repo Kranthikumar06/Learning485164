@@ -26,11 +26,10 @@
     </div>
   </div>
 
-  <!-- Content -->
+  <!-- Signup Form -->
   <div class="content">
     <div class="signup-card">
       <h2>Create Your Account</h2>
-      <!-- ✅ added id="signupForm" -->
       <form id="signupForm">
         <div class="input-group">
           <label for="fullname">User Name</label>
@@ -40,7 +39,6 @@
           <label for="email">Email Address</label>
           <input type="email" id="email" name="email" placeholder="Enter your email" required>
         </div>
-        
         <div class="input-group">
           <label for="password">Password</label>
           <input type="password" id="password" name="password" placeholder="Enter your password" required>
@@ -51,6 +49,13 @@
         </div>
         <button type="submit" class="btn"><span>Sign Up</span></button>
       </form>
+
+      <!-- Social login buttons -->
+      <div class="social-login">
+        <button class="social-btn google">G</button>
+        <button class="social-btn linkedin">in</button>
+      </div>
+
       <div class="links">
         <p>Already have an account? <a href="signin.html">Login</a></p>
       </div>
@@ -62,7 +67,6 @@
     <p>© 2025 Secure My Campus | <a href="#">Privacy Policy</a> | <a href="#">Help Center</a></p>
   </footer>
 
-<link rel="javascript" href="signup.js">
-
+  <script src="signup.js"></script>
 </body>
 </html>
