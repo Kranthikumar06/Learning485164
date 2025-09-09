@@ -15,10 +15,11 @@ var pagesRouter = require('./app_server/routes/pages');
 var app = express();
 // Disable x-powered-by header
 app.disable('x-powered-by');
+app.set('views', path.join(__dirname, 'app_server', 'views'));
+app.set('view engine', 'jade');
 
 // view engine setup
 const fs = require('fs');
-const path = require('path');
 require('dotenv').config();
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
@@ -50,40 +51,21 @@ passport.use(new GoogleStrategy({
   }
   return done(null, profile);
 }));
-  clientSecret: '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',
-  callbackURL: '/users/auth/google/callback'
-}, function(accessToken, refreshToken, profile, done) {
-  // Save user info to users.json if not already present
-  const filePath = path.join(__dirname, 'data', 'users.json');
-  let users = [];
-  if (fs.existsSync(filePath)) {
-    try {
-      users = JSON.parse(fs.readFileSync(filePath));
-    } catch (e) {
-      users = [];
-    }
-  }
-  const email = profile.emails && profile.emails[0] ? profile.emails[0].value : '';
-  let user = users.find(u => u.email === email);
-  if (!user && email) {
-    user = {
-      name: profile.displayName,
-      email: email,
-      username: profile.id,
-      phone: '',
-      password: '' // No password for Google users
-    };
-    users.push(user);
-    fs.writeFileSync(filePath, JSON.stringify(users, null, 2));
-  }
-  return done(null, profile);
-}));
 
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((obj, done) => done(null, obj));
 
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'securemycampus',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false }
+}));
+app.use(cookieParser());
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // routes
@@ -93,32 +75,44 @@ app.use('/users', usersRouter);    // user-related routes
 
 // Root-level signup and signin routes
 app.get('/signup', function(req, res) {
-  let email = '';
+  let user = null;
   if (req.cookies && req.cookies.token) {
     try {
       const jwt = require('jsonwebtoken');
       const JWT_SECRET = 'securemycampusjwt';
-      const user = jwt.verify(req.cookies.token, JWT_SECRET);
-      email = user.email;
+      user = jwt.verify(req.cookies.token, JWT_SECRET);
     } catch (e) {
-      email = '';
+      user = null;
     }
   }
-  res.render('signup', { title: 'Sign Up', email });
+  res.render('signup', {
+    title: 'Sign Up',
+    email: user ? user.email : '',
+    name: user ? user.name : '',
+    username: user ? user.username : '',
+    phone: user ? user.phone : '',
+    user: user
+  });
 });
 app.get('/signin', function(req, res) {
-  let email = '';
+  let user = null;
   if (req.cookies && req.cookies.token) {
     try {
       const jwt = require('jsonwebtoken');
       const JWT_SECRET = 'securemycampusjwt';
-      const user = jwt.verify(req.cookies.token, JWT_SECRET);
-      email = user.email;
+      user = jwt.verify(req.cookies.token, JWT_SECRET);
     } catch (e) {
-      email = '';
+      user = null;
     }
   }
-  res.render('signin', { title: 'Sign In', email });
+  res.render('signin', {
+    title: 'Sign In',
+    email: user ? user.email : '',
+    name: user ? user.name : '',
+    username: user ? user.username : '',
+    phone: user ? user.phone : '',
+    user: user
+  });
 });
 
 // catch 404 and forward to error handler

@@ -3,7 +3,60 @@ const passport = require('passport');
 const fs = require('fs');
 const path = require('path');
 var router = express.Router();
+// Set password for Google users
+router.get('/set-password', function(req, res) {
+  let user = null;
+  if (req.cookies && req.cookies.token) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const JWT_SECRET = 'securemycampusjwt';
+      user = jwt.verify(req.cookies.token, JWT_SECRET);
+    } catch (e) {
+      user = null;
+    }
+  }
+  if (!user) {
+    return res.render('signin', { title: 'Sign In', error: 'Please sign in with Google first.', email: '' });
+  }
+  res.render('set_password', { title: 'Set Password', email: user.email });
+});
 
+router.post('/set-password', async function(req, res) {
+  const { password, confirm_password } = req.body;
+  let user = null;
+  if (req.cookies && req.cookies.token) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const JWT_SECRET = 'securemycampusjwt';
+      user = jwt.verify(req.cookies.token, JWT_SECRET);
+    } catch (e) {
+      user = null;
+    }
+  }
+  if (!user || !user.email) {
+    return res.render('signin', { title: 'Sign In', error: 'Please sign in with Google first.', email: '' });
+  }
+  if (!password || password !== confirm_password) {
+    return res.render('set_password', { title: 'Set Password', error: 'Passwords must match.', email: user.email });
+  }
+  const filePath = path.join(__dirname, '../../data/users.json');
+  let users = [];
+  if (fs.existsSync(filePath)) {
+    try {
+      users = JSON.parse(fs.readFileSync(filePath));
+    } catch (e) {
+      users = [];
+    }
+  }
+  let dbUser = users.find(u => u.email === user.email);
+  if (!dbUser) {
+    return res.render('set_password', { title: 'Set Password', error: 'User not found.', email: user.email });
+  }
+  const hashed = await bcrypt.hash(password, 10);
+  dbUser.password = hashed;
+  fs.writeFileSync(filePath, JSON.stringify(users, null, 2));
+  res.redirect('/profile');
+});
 // Google OAuth routes
 router.get('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
@@ -22,7 +75,7 @@ router.get('/auth/google/callback',
       username: user.id,
       phone: ''
     }, JWT_SECRET, { expiresIn: '2h' });
-    res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' });
+  res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: false, path: '/' });
     res.redirect('/');
   }
 );
@@ -124,7 +177,7 @@ router.post('/signin', async function(req, res) {
   }
   // Issue JWT token
   const token = jwt.sign({ email: user.email, name: user.name, username: user.username, phone: user.phone }, JWT_SECRET, { expiresIn: '2h' });
-  res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' });
+  res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: false });
   res.redirect('/');
 });
 
