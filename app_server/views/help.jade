@@ -1,0 +1,44 @@
+extends layout
+
+block content
+  .navbar
+    .logo-container
+      img(src="/images/Campus.png", alt="Secure My Campus Logo")
+      div
+        span(style="font-size:22px;font-weight:bold;color:#007bff;") Secure
+        span(style="font-size:16px;color:#333;letter-spacing:1px;") My Campus
+    .nav-links
+      a(href="/") Home
+      a(href="/complaint") Complaint Box
+      if email
+        a(href="/form") Form Page
+        a(href="/help") Help Center
+        a(href="/profile", title="Profile") Profile
+      if !email
+        a(href="/users/signup") Sign Up
+        a(href="/users/signin") Sign In
+    .profile-top-right
+      if email
+        a(href="/profile", title="Profile")
+          img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;")
+  .page-title Chatbot
+  .navbar
+    .logo-container
+      img(src="/images/Campus.png", alt="Secure My Campus Logo")
+      div
+        span(style="font-size:22px;font-weight:bold;color:#007bff;") Secure
+        span(style="font-size:16px;color:#333;letter-spacing:1px;") My Campus
+    .nav-links
+      a(href="/") Home
+      a(href="/complaint") Complaint Box
+      a(href="/form") Form Page
+      a(href="/help") Help Center
+    .profile-top-right
+      a(href="/profile", title="Profile")
+        img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;")
+  #conversation
+  .input-bar
+    .input-bar-inner
+      input#inputBox(type="text", placeholder="Type your message...", onkeydown="if(event.key==='Enter'){sendToPython();}")
+      button(type="button", onclick="sendToPython()") Send
+  script(src="/javascripts/chatbot.js")

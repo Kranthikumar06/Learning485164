@@ -1,0 +1,38 @@
+extends layout
+
+block content
+  .navbar
+    .logo-container
+      img(src="/images/Campus.png", alt="Secure My Campus Logo")
+      div
+        span(style="font-size:22px;font-weight:bold;color:#007bff;") Secure
+        span(style="font-size:16px;color:#333;letter-spacing:1px;") My Campus
+    .nav-links
+      a(href="/") Home
+      a(href="/complaint") Complaint Box
+      a(href="/form") Form Page
+      a(href="/help") Help Center
+      if !email
+        a(href="/users/signup") Sign Up
+        a(href="/users/signin") Sign In
+    .profile-top-right
+      if email
+        a(href="/profile", title="Profile")
+          img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;")
+  if typeof email !== 'undefined' && email
+    .welcome-user(style="margin:16px 0;font-weight:bold;color:#1976d2;") Welcome, #{email}!
+  .home-bg-section
+    .home-bg-overlay
+      p.home-welcome Welcome to Secure My Campus!
+      p.home-desc
+        | Secure My Campus is a platform designed to help students, staff, and visitors easily submit complaints, access forms, manage profiles, and sign in securely. Our goal is to make your campus experience safer, more efficient, and more connected. If you have any issues or suggestions, please reach out to us!
+  .home-contact
+    h2 Contact Us
+    p Phone: +91-9876543210
+    p Email: support@securemycampus.com
+footer
+  p
+    | © 2025 Secure My Campus |
+    a(href="#") Privacy Policy
+    |  |
+    a(href="#") Help Center

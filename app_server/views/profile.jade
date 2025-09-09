@@ -1,0 +1,25 @@
+extends layout
+
+block content
+  h1 Profile Page
+  if typeof email !== 'undefined' && typeof name !== 'undefined'
+    p Welcome, #{name} (#{email})!
+    ul.profile-details
+      li Name: #{name}
+      li Username: #{username}
+      li Phone: #{phone}
+      li Email: #{email}
+  else if typeof email !== 'undefined'
+    p Welcome, #{email}!
+  else
+    p Welcome, Guest!
+  if typeof email !== 'undefined'
+    form(action="/users/logout", method="post")
+      button(type="submit", class="btn btn-danger", style="margin-top:20px;") Log Out
+// No navigation bar here
+footer
+  p
+    | © 2025 Secure My Campus |
+    a(href="#") Privacy Policy
+    |  |
+    a(href="#") Help Center

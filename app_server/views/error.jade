@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  h1 Error
+  if typeof message !== 'undefined'
+    h2= message
+  else
+    h2 An error occurred
+  if typeof error !== 'undefined' && typeof error.status !== 'undefined'
+    h3 Status: #{error.status}
+  if typeof error !== 'undefined' && typeof error.stack !== 'undefined'
+    pre #{error.stack}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure My Campus - Incident Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px 40px 20px 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            color: #34495e;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="checkbox"] {
+            width: auto;
+        }
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 10px;
+            background: #2980b9;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1c5d85;
+        }
+        .note {
+            font-size: 0.95em;
+            color: #888;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Report an Incident</h2>
+        <form id="incidentForm">
+            <label for="anonymous">
+                <input type="checkbox" id="anonymous" name="anonymous" onchange="toggleIdentityFields()"> Submit Anonymously
+            </label>
+            <div id="identityFields">
+                <label for="name">Name (optional)</label>
+                <input type="text" id="name" name="name" placeholder="Your name">
+                <label for="email">Email (optional)</label>
+                <input type="email" id="email" name="email" placeholder="Your email">
+            </div>
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+                <option value="">Select category</option>
+                <option value="Lost Item">Lost Item</option>
+                <option value="Harassment">Harassment</option>
+                <option value="Safety Concern">Safety Concern</option>
+                <option value="Suspicious Activity">Suspicious Activity</option>
+                <option value="Other">Other</option>
+            </select>
+            <label for="location">Location</label>
+            <input type="text" id="location" name="location" placeholder="e.g., Library, Parking Lot" required>
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="4" placeholder="Describe the incident..." required></textarea>
+            <label for="photo">Photo (optional)</label>
+            <input type="file" id="photo" name="photo" accept="image/*">
+            <button type="submit">Submit Report</button>
+        </form>
+        <div class="note">Your report will be kept confidential and only accessible to campus security.</div>
+    </div>
+    <script>
+        function toggleIdentityFields() {
+            const isAnon = document.getElementById('anonymous').checked;
+            document.getElementById('identityFields').style.display = isAnon ? 'none' : 'block';
+        }
+        // Optional: Prevent default form submission for now
+        document.getElementById('incidentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Report submitted! (Functionality to be implemented)');
+        });
+    </script>
+</body>
+</html>

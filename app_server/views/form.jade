@@ -1,0 +1,57 @@
+extends layout
+
+block content
+  .navbar
+    .logo-container
+      img(src="/images/Campus.png", alt="Secure My Campus Logo")
+      div
+        span(style="font-size:22px;font-weight:bold;color:#007bff;") Secure
+        span(style="font-size:16px;color:#333;letter-spacing:1px;") My Campus
+    .nav-links
+      a(href="/") Home
+      a(href="/complaint") Complaint Box
+      if email
+        a(href="/form") Form Page
+        a(href="/help") Help Center
+      if !email
+        a(href="/users/signup") Sign Up
+        a(href="/users/signin") Sign In
+    .profile-top-right
+      a(href="/profile", title="Profile")
+        img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;")
+  h1= typeof title !== 'undefined' ? title : 'Form Page'
+  .incident-form
+    h2 Report an Incident
+    form(method="POST", action="/submit-incident", enctype="multipart/form-data")
+      .form-group
+        label(for="name") Name (optional)
+        input#name.form-control(type="text", name="name", placeholder="Your name")
+      .form-group
+        label(for="email") Email (optional)
+        input#email.form-control(type="email", name="email", placeholder="Your email")
+      .form-group
+        label(for="category") Category
+        select#category.form-control(name="category")
+          option(value="", selected, disabled) Select category
+          option(value="Harassment") Harassment
+          option(value="Safety") Safety
+          option(value="Theft") Theft
+          option(value="Other") Other
+      .form-group
+        label(for="location") Location
+        input#location.form-control(type="text", name="location", placeholder="e.g., Library, Parking Lot")
+      .form-group
+        label(for="description") Description
+        textarea#description.form-control(name="description", rows="4", placeholder="Describe the incident...")
+      .form-group
+        label(for="photo") Photo (optional)
+        input#photo.form-control(type="file", name="photo", accept="image/*")
+      button.btn(type="submit")
+        span Submit Report
+
+footer
+  p
+    | © 2025 Secure My Campus |
+    a(href="#") Privacy Policy
+    |  |
+    a(href="#") Help Center
