@@ -1,0 +1,250 @@
+ /* Reset */
+ * {
+     margin: 0;
+     padding: 0;
+     box-sizing: border-box;
+     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+ }
+
+ body {
+     background: linear-gradient(135deg, #e3f2fd, #e1bee7);
+     display: flex;
+     flex-direction: column;
+     min-height: 100vh;
+ }
+
+ /* Navbar */
+ .navbar {
+     width: 100%;
+     background: #fff;
+     padding: 12px 40px;
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+     position: fixed;
+     top: 0;
+     left: 0;
+     z-index: 1000;
+ }
+
+ .navbar-left {
+     display: flex;
+     align-items: center;
+     gap: 40px;
+ }
+
+ .logo-container {
+     display: flex;
+     align-items: center;
+ }
+
+ .logo-container img {
+     width: 70px;
+     height: auto;
+ }
+
+ .logo-container div {
+     display: flex;
+     flex-direction: column;
+     margin-left: 12px;
+ }
+
+ .logo-container div span:first-child {
+     font-size: 22px;
+     font-weight: bold;
+     color: #007bff;
+ }
+
+ .logo-container div span:last-child {
+     font-size: 16px;
+     color: #333;
+     letter-spacing: 1px;
+ }
+
+ /* Nav links */
+ .nav-links {
+     display: flex;
+     gap: 20px;
+     align-items: center;
+ }
+
+ .nav-links a {
+     text-decoration: none;
+     color: #007bff;
+     font-size: 15px;
+     padding: 8px 16px;
+     border-radius: 24px;
+     transition: color 0.3s, background 0.3s, transform 0.2s;
+ }
+
+ .nav-links a:hover {
+     color: #fff;
+     background: linear-gradient(90deg, #e1bee7 0%, #4a90e2 100%);
+     transform: translateY(-2px);
+ }
+
+ /* Auth buttons */
+ .auth-buttons {
+     display: flex;
+     gap: 12px;
+ }
+
+ .auth-buttons a {
+     text-decoration: none;
+     padding: 8px 18px;
+     border-radius: 20px;
+     font-weight: bold;
+     font-size: 14px;
+     transition: color 0.3s, border 0.3s;
+     color: #111;
+     /* Black text */
+     background: none;
+     border: 2px solid #111;
+     /* Black border */
+ }
+
+ .auth-buttons a:hover {
+     color: #007bff;
+     /* Blue on hover */
+     border-color: #007bff;
+     /* Blue border on hover */
+     background: none;
+ }
+
+ /* Content */
+ .content {
+     flex: 1;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     padding-top: 100px;
+     padding-bottom: 40px;
+     margin-top: 20px;
+ }
+
+ /* Complaint Box Card */
+ .form-container {
+     background: #fff;
+     padding: 40px 35px;
+     border-radius: 20px;
+     width: 450px;
+     border: 2px solid #e1bee7;
+     box-shadow:
+         0 0 24px 0 rgba(225, 190, 231, 0.18),
+         0 0 48px 0 rgba(74, 144, 226, 0.10);
+     transition: transform 0.3s ease;
+ }
+
+ .form-container:hover {
+     transform: translateY(-5px) scale(1.02);
+     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+ }
+
+ .form-container h2 {
+     text-align: center;
+     color: #222;
+     margin-bottom: 25px;
+     font-size: 25px;
+     font-weight: 700;
+     font-family: 'Montserrat', 'Poppins', Arial, sans-serif;
+     /* Changed font */
+     letter-spacing: 2px;
+     text-shadow: none;
+     background: none;
+     -webkit-background-clip: initial;
+     -webkit-text-fill-color: initial;
+ }
+
+ /* Input Fields */
+ label {
+     font-weight: bold;
+     display: block;
+     margin-bottom: 6px;
+     color: #444;
+ }
+
+ input,
+ select,
+ textarea {
+     width: 100%;
+     padding: 12px;
+     border-radius: 10px;
+     border: 1px solid #ccc;
+     margin-bottom: 15px;
+     transition: all 0.3s ease;
+     font-size: 15px;
+ }
+
+ input:focus,
+ select:focus,
+ textarea:focus {
+     border-color: #4A90E2;
+     box-shadow: 0 0 12px rgba(74, 144, 226, 0.5);
+     outline: none;
+     transform: scale(1.01);
+ }
+
+ textarea {
+     resize: none;
+     height: 110px;
+ }
+
+ input[type="file"] {
+     border: none;
+ }
+
+ /* Submit Button */
+ .submit-btn {
+     width: 100%;
+     padding: 14px;
+     border: none;
+     border-radius: 12px;
+     background: linear-gradient(45deg, #4a90e2, #007bff);
+     color: #fff;
+     font-size: 16px;
+     font-weight: bold;
+     cursor: pointer;
+     transition: all 0.5s ease;
+     position: relative;
+     overflow: hidden;
+ }
+
+ .submit-btn::before {
+     content: "";
+     position: absolute;
+     top: 0;
+     left: -100%;
+     width: 200%;
+     height: 100%;
+     background: linear-gradient(120deg, #007bff, #00c6ff, #007bff);
+     transition: all 0.5s ease;
+     z-index: 0;
+ }
+
+ .submit-btn:hover::before {
+     left: 0;
+ }
+
+ .submit-btn span {
+     position: relative;
+     z-index: 1;
+ }
+
+ /* Footer */
+ footer {
+     text-align: center;
+     padding: 20px;
+     font-size: 12px;
+     color: #555;
+ }
+
+ footer a {
+     color: #007bff;
+     text-decoration: none;
+     margin: 0 5px;
+ }
+
+ footer a:hover {
+     text-decoration: underline;
+ }

@@ -1,4 +1,3 @@
-
 var express = require('express');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = 'securemycampusjwt';
@@ -93,7 +92,7 @@ const upload = multer({
 });
 router.post('/submit-incident', upload.single('photo'), function(req, res) {
 	// For file uploads, use multer (not implemented here)
-	const { name, email, category, location, description } = req.body;
+	const { name, phone, date, email, category, location, description } = req.body;
 	let photo = '';
 	if (req.file && req.file.filename) {
 		photo = '/images/uploads/' + req.file.filename;
@@ -103,13 +102,13 @@ router.post('/submit-incident', upload.single('photo'), function(req, res) {
 	const now = Date.now();
 	const expiresAt = now + 7 * 24 * 60 * 60 * 1000; // 7 days from now
 	const complaint = {
-		name,
+		phone,
+		date,
 		email,
 		category,
 		location,
 		description,
 		photo,
-		date: new Date().toISOString(),
 		color: 'red',
 		expiresAt
 	};

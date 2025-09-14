@@ -35,15 +35,14 @@ block content
     .complaints-container
         each complaint, i in complaints
           .complaint-box(style=`border-color:${complaint.color||'red'};`)
-            // ...removed top right timer...
-            h3= complaint.name
-            p Email: #{complaint.email}
-            p Category: #{complaint.category}
-            p Location: #{complaint.location}
-            p Description: #{complaint.description}
+            // Email removed
             if complaint.photo
               img(src=complaint.photo, alt='Photo', style='max-width:200px;max-height:200px;')
             p Date: #{complaint.date}
+            p Phone: #{complaint.phone}
+            p Category: #{complaint.category}
+            p Location: #{complaint.location}
+            p Description: #{complaint.description}
             if complaint.expiresAt
               - var secondsLeft = Math.max(0, Math.floor((complaint.expiresAt - now) / 1000));
               - var days = Math.floor(secondsLeft / (24 * 60 * 60));
@@ -77,4 +76,3 @@ footer
     a(href="#") Privacy Policy
     |  |
     a(href="#") Help Center
-  

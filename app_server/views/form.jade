@@ -1,57 +1,62 @@
-extends layout
-
-block content
-  .navbar
-    .logo-container
-      img(src="/images/Campus.png", alt="Secure My Campus Logo")
-      div
-        span(style="font-size:22px;font-weight:bold;color:#007bff;") Secure
-        span(style="font-size:16px;color:#333;letter-spacing:1px;") My Campus
-    .nav-links
-      a(href="/") Home
-      a(href="/complaint") Complaint Box
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Secure My Campus - Complaint Box
+    link(href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap", rel="stylesheet")
+    link(rel="stylesheet", href="/stylesheets/complaint_box.css")
+  body
+    // Navbar
+    .navbar
+      .navbar-left
+        .logo-container
+          img(src="/images/Campus.png", alt="Secure Campus Logo")
+          div
+            span Secure
+            span Campus
+        .nav-links
+          a(href="/") Home
+          a(href="/complaint") Complaint Box
+          if email
+            a(href="/form") Form Page
+            a(href="/help") Help Center
       if email
-        a(href="/form") Form Page
-        a(href="/help") Help Center
-      if !email
-        a(href="/users/signup") Sign Up
-        a(href="/users/signin") Sign In
-    .profile-top-right
-      a(href="/profile", title="Profile")
-        img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;")
-  h1= typeof title !== 'undefined' ? title : 'Form Page'
-  .incident-form
-    h2 Report an Incident
-    form(method="POST", action="/submit-incident", enctype="multipart/form-data")
-      .form-group
-        label(for="name") Name (optional)
-        input#name.form-control(type="text", name="name", placeholder="Your name")
-      .form-group
-        label(for="email") Email (optional)
-        input#email.form-control(type="email", name="email", placeholder="Your email")
-      .form-group
-        label(for="category") Category
-        select#category.form-control(name="category")
-          option(value="", selected, disabled) Select category
-          option(value="Harassment") Harassment
-          option(value="Safety") Safety
-          option(value="Theft") Theft
-          option(value="Other") Other
-      .form-group
-        label(for="location") Location
-        input#location.form-control(type="text", name="location", placeholder="e.g., Library, Parking Lot")
-      .form-group
-        label(for="description") Description
-        textarea#description.form-control(name="description", rows="4", placeholder="Describe the incident...")
-      .form-group
-        label(for="photo") Photo (optional)
-        input#photo.form-control(type="file", name="photo", accept="image/*")
-      button.btn(type="submit")
-        span Submit Report
+        .profile-navbar-right(style="position:absolute; right:20px; top:50%; transform:translateY(-50%);")
+          a(href="/profile")
+            img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;")
+      
+    // Content
+    .content
+      .profile-top-right
 
-footer
-  p
-    | © 2025 Secure My Campus |
-    a(href="#") Privacy Policy
-    |  |
-    a(href="#") Help Center
+      .form-container
+        h2 Complaint Box
+        form(action="/submit-incident", method="post", enctype="multipart/form-data")
+          label(for="name") Name
+          input(type="text", id="name", name="name", required=true)
+          label(for="phone") Phone Number
+          input(type="tel", id="phone", name="phone", required=true, pattern="[0-9]{10}")
+          label(for="date") Date
+          input(type="date", id="date", name="date", required=true)
+          label(for="category") Complaint Type
+          select(id="category", name="category", required=true)
+            option(value="") -- Select Complaint Type --
+            option(value="harassment") Harassment
+            option(value="food") Food Issue
+            option(value="lost") Lost and Found
+            option(value="hostel") Hostel Issue
+          label(for="location") Location
+          input(type="text", id="location", name="location", required=true)
+          label(for="description") Description
+          textarea(id="description", name="description", required=true)
+          label(for="photo") Upload Photos (at least 2)
+          input(type="file", id="photo", name="photo", accept="image/*", multiple=true, required=false)
+          button(type="submit", class="submit-btn")
+            span Submit Complaint
+    // Footer
+    footer
+      p © 2025 Secure My Campus | 
+        a(href="#") Privacy Policy
+        | 
+        a(href="#") Help Center
