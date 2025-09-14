@@ -1,25 +1,40 @@
-extends layout
-
-block content
-  h1 Profile Page
-  if typeof email !== 'undefined' && typeof name !== 'undefined'
-    p Welcome, #{name} (#{email})!
-    ul.profile-details
-      li Name: #{name}
-      li Username: #{username}
-      li Phone: #{phone}
-      li Email: #{email}
-  else if typeof email !== 'undefined'
-    p Welcome, #{email}!
-  else
-    p Welcome, Guest!
-  if typeof email !== 'undefined'
-    form(action="/users/logout", method="post")
-      button(type="submit", class="btn btn-danger", style="margin-top:20px;") Log Out
-// No navigation bar here
-footer
-  p
-    | © 2025 Secure My Campus |
-    a(href="#") Privacy Policy
-    |  |
-    a(href="#") Help Center
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Secure My Campus - Profile
+    link(href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap", rel="stylesheet")
+    link(rel="stylesheet", href="/stylesheets/profile.css")
+  body
+    .profile-container
+      div(style="flex:1;")
+        .profile-title Profile
+        .profile-fields
+          .profile-field
+            label User Name
+            .field-value#profileName #{name}
+          .profile-field
+            label E-mail
+            .field-value#profileEmail #{email}
+          .profile-field
+            label Password
+            .field-value.password#profilePassword ••••••••
+          .profile-field
+            label Location
+            .field-value#profileLocation #{user && user.location ? user.location : 'Not set'}
+          .profile-field
+            label Phone
+            .field-value#profilePhone #{phone}
+        .profile-actions
+          button.back(onclick="goBack()") Back
+          button.edit(onclick="editProfile()") Edit
+          button.logout(onclick="logoutUser()") Logout
+      .profile-image-section
+        img(src="/images/profile.png", alt="Campus Logo")
+    footer
+      p © 2025 Secure My Campus | 
+        a(href="#") Privacy Policy
+        |  
+        a(href="#") Help Center
+    script(src="/javascripts/profile.js")

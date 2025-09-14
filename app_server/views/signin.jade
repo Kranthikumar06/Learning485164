@@ -26,7 +26,7 @@ block content
       if typeof error !== 'undefined' && error
         .error-message(style="color:#d32f2f;margin-bottom:16px;font-weight:bold;") #{error}
       form(action="/users/signin", method="post")
-        h2 Sign In for an Account
+        h1 Sign In 
         .input-group
           label(for="email") Email Address
           input(type="email", id="email", name="email", placeholder="Enter your email", required)
@@ -37,12 +37,23 @@ block content
           span Sign In
         .links
           a(href="/users/signup") Don't have an account? Sign Up
+        .social-login-center(style="display:flex; justify-content:center; align-items:center; margin-top:20px;")
+          a(href="/users/auth/google", class="social-btn google-btn", title="Google Login", style="display:flex; align-items:center; background:#eaf2fe; border-radius:10px; padding:12px 0; width:100%; max-width:340px; text-decoration:none; box-shadow:0 2px 8px rgba(0,0,0,0.04); justify-content:center; margin:0 auto;")
+            img(src="/images/Screenshot 2025-09-09 144051.png", alt="Google icon", class="google-icon", style="height:24px;width:24px;margin-right:12px;border-radius:50%;object-fit:cover;")
+            span(style="font-size:18px; color:#4285f4; font-weight:500;") Continue with Google
       .google-auth
-        .google-center
-          a(href="/users/auth/google", class="google-btn", style="display:flex;justify-content:center;align-items:center;")
-            img(src="/images/Screenshot 2025-09-09 144051.png", alt="Google icon", style="height:28px;width:28px;cursor:pointer;margin-top:12px;")
+        //- .google-center
+        //-   a(href="/users/auth/google", class="google-btn", style="display:flex;justify-content:center;align-items:center;")
+        //-     img(src="/images/Screenshot 2025-09-09 144051.png", alt="Google icon", style="height:28px;width:28px;cursor:pointer;margin-top:12px;")
   footer
     p © 2025 Secure My Campus | 
       a(href="#") Privacy Policy
       |  | 
       a(href="#") Help Center
+
+  style.
+    .google-icon:hover {
+      border: 2px solid #000;
+      background: #fff;
+    }
+

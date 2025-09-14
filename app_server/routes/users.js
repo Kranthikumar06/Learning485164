@@ -75,7 +75,22 @@ router.get('/auth/google/callback',
       username: user.id,
       phone: ''
     }, JWT_SECRET, { expiresIn: '2h' });
-  res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: false, path: '/' });
+    res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: false, path: '/' });
+    // Check if password is set for this user
+    const filePath = path.join(__dirname, '../../data/users.json');
+    let users = [];
+    if (fs.existsSync(filePath)) {
+      try {
+        users = JSON.parse(fs.readFileSync(filePath));
+      } catch (e) {
+        users = [];
+      }
+    }
+    const dbUser = users.find(u => u.email === user.emails[0].value);
+    if (dbUser && (!dbUser.password || dbUser.password === '')) {
+      // Redirect to set password if not set
+      return res.redirect('/users/set-password');
+    }
     res.redirect('/');
   }
 );
@@ -172,7 +187,13 @@ router.post('/signin', async function(req, res) {
     }
   }
   const user = users.find(u => u.email === email);
-  if (!user || !(await bcrypt.compare(password, user.password))) {
+  if (!user) {
+    return res.render('signin', { title: 'Sign In', error: 'Invalid entry. Email or password is incorrect.', email: '' });
+  }
+  if (!user.password || user.password === '') {
+    return res.render('signin', { title: 'Sign In', error: 'You must set a password before logging in. Please sign in with Google and set your password.', email: email });
+  }
+  if (!(await bcrypt.compare(password, user.password))) {
     return res.render('signin', { title: 'Sign In', error: 'Invalid entry. Email or password is incorrect.', email: '' });
   }
   // Issue JWT token
