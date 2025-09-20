@@ -9,14 +9,9 @@ block content
         span(style="font-size:16px;color:#333;letter-spacing:1px;") My Campus
     .nav-links
       a(href="/") Home
-      a(href="/complaint") Complaint
-      if email
-        a(href="/form") Form Page
-        a(href="/help") Help Center
-        a(href="/profile", title="Profile") Profile
-      if !email
-        a(href="/users/signup") Sign Up
-        a(href="/users/signin") Sign In
+      a(href="/complaint") Complaint Box
+      a(href="/users/signup") Sign Up
+      a(href="/users/signin") Sign In
     .profile-top-right
       if email
         a(href="/profile", title="Profile")

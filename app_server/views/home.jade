@@ -10,11 +10,12 @@ block content
     .nav-links
       a(href="/") Home
       a(href="/complaint") Complaint Box
-      a(href="/form") Form Page
-      a(href="/help") Help Center
-      if !email
-        a(href="/users/signup") Sign Up
-        a(href="/users/signin") Sign In
+        if email
+          a(href="/form") Form Page
+          a(href="/help") Help Center
+        else
+          a(href="/users/signup") Sign Up
+          a(href="/users/signin") Sign In
     .profile-top-right
       if email
         a(href="/profile", title="Profile")
@@ -29,10 +30,8 @@ block content
   .home-contact
     h2 Contact Us
     p Phone: +91-9876543210
-    p Email: support@securemycampus.com
+    p Email: contact@securemycampus.com
 footer
   p
     | © 2025 Secure My Campus |
     a(href="#") Privacy Policy
-    |  |
-    a(href="#") Help Center

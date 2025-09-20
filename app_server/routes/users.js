@@ -1,15 +1,103 @@
+
 const express = require('express');
 const passport = require('passport');
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = 'securemycampusjwt';
 var router = express.Router();
+
+const upload = multer({
+  dest: path.join(__dirname, '../../public/images/uploads/'),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  }
+});
+
+router.get('/edit-profile', function(req, res) {
+  let user = null;
+  if (req.cookies && req.cookies.token) {
+    try {
+      const jwt = require('jsonwebtoken');
+      user = jwt.verify(req.cookies.token, JWT_SECRET);
+    } catch (e) {
+      user = null;
+    }
+  }
+  if (!user) {
+    return res.redirect('/users/signin');
+  }
+  // Load user from users.json
+  const filePath = path.join(__dirname, '../../data/users.json');
+  let users = [];
+  if (fs.existsSync(filePath)) {
+    try {
+      users = JSON.parse(fs.readFileSync(filePath));
+    } catch (e) {
+      users = [];
+    }
+  }
+  let dbUser = users.find(u => u.email === user.email);
+  res.render('edit_profile', {
+    title: 'Edit Profile',
+    name: dbUser ? dbUser.name : user.name,
+    email: dbUser ? dbUser.email : user.email,
+    location: dbUser ? dbUser.location : '',
+    phone: dbUser ? dbUser.phone : '',
+    user: dbUser || user
+  });
+});
+
+router.post('/edit-profile', upload.single('photo'), function(req, res) {
+  let user = null;
+  if (req.cookies && req.cookies.token) {
+    try {
+      const jwt = require('jsonwebtoken');
+      user = jwt.verify(req.cookies.token, JWT_SECRET);
+    } catch (e) {
+      user = null;
+    }
+  }
+  if (!user) {
+    return res.redirect('/users/signin');
+  }
+  const { name, location, phone } = req.body;
+  let photo = '';
+  if (req.file && req.file.filename) {
+    photo = '/images/uploads/' + req.file.filename;
+  }
+  // Update user in users.json
+  const filePath = path.join(__dirname, '../../data/users.json');
+  let users = [];
+  if (fs.existsSync(filePath)) {
+    try {
+      users = JSON.parse(fs.readFileSync(filePath));
+    } catch (e) {
+      users = [];
+    }
+  }
+  let dbUser = users.find(u => u.email === user.email);
+  if (dbUser) {
+    dbUser.name = name;
+    dbUser.location = location;
+    dbUser.phone = phone;
+    if (photo) dbUser.photo = photo;
+    fs.writeFileSync(filePath, JSON.stringify(users, null, 2));
+  }
+  res.redirect('/profile');
+});
 // Set password for Google users
 router.get('/set-password', function(req, res) {
   let user = null;
   if (req.cookies && req.cookies.token) {
     try {
       const jwt = require('jsonwebtoken');
-      const JWT_SECRET = 'securemycampusjwt';
       user = jwt.verify(req.cookies.token, JWT_SECRET);
     } catch (e) {
       user = null;
@@ -27,7 +115,6 @@ router.post('/set-password', async function(req, res) {
   if (req.cookies && req.cookies.token) {
     try {
       const jwt = require('jsonwebtoken');
-      const JWT_SECRET = 'securemycampusjwt';
       user = jwt.verify(req.cookies.token, JWT_SECRET);
     } catch (e) {
       user = null;
@@ -68,7 +155,6 @@ router.get('/auth/google/callback',
     // Set JWT token cookie for Google user
     const user = req.user;
     const jwt = require('jsonwebtoken');
-    const JWT_SECRET = 'securemycampusjwt';
     const token = jwt.sign({
       email: user.emails[0].value,
       name: user.displayName,
@@ -114,7 +200,6 @@ router.get('/signup', function(req, res) {
   if (req.cookies && req.cookies.token) {
     try {
       const jwt = require('jsonwebtoken');
-      const JWT_SECRET = 'securemycampusjwt';
       const user = jwt.verify(req.cookies.token, JWT_SECRET);
       email = user.email;
     } catch (e) {
@@ -129,7 +214,6 @@ router.get('/signin', function(req, res) {
   if (req.cookies && req.cookies.token) {
     try {
       const jwt = require('jsonwebtoken');
-      const JWT_SECRET = 'securemycampusjwt';
       const user = jwt.verify(req.cookies.token, JWT_SECRET);
       email = user.email;
     } catch (e) {
@@ -139,9 +223,6 @@ router.get('/signin', function(req, res) {
   res.render('signin', { title: 'Sign In', email });
 });
 // Signup route
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const JWT_SECRET = 'securemycampusjwt';
 router.post('/signup', async function(req, res) {
   const { name, username, phone, email, password, confirm_password } = req.body;
   if (!name || !username || !phone || !email || !password || password !== confirm_password) {

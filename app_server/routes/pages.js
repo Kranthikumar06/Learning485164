@@ -207,13 +207,28 @@ router.get('/profile', function(req, res) {
 					user = null;
 				}
 			}
+			let dbUser = null;
+			if (user && user.email) {
+				const fs = require('fs');
+				const path = require('path');
+				const filePath = path.join(__dirname, '../../data/users.json');
+				let users = [];
+				if (fs.existsSync(filePath)) {
+					try {
+						users = JSON.parse(fs.readFileSync(filePath));
+					} catch (e) {
+						users = [];
+					}
+				}
+				dbUser = users.find(u => u.email === user.email);
+			}
 			res.render('profile', {
 				title: 'Profile',
-				email: user ? user.email : '',
-				name: user ? user.name : '',
-				username: user ? user.username : '',
-				phone: user ? user.phone : '',
-				user: user
+				email: dbUser ? dbUser.email : (user ? user.email : ''),
+				name: dbUser ? dbUser.name : (user ? user.name : ''),
+				username: dbUser ? dbUser.username : (user ? user.username : ''),
+				phone: dbUser ? dbUser.phone : (user ? user.phone : ''),
+				user: dbUser || user
 			});
 });
 

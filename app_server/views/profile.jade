@@ -28,10 +28,13 @@ html(lang="en")
             .field-value#profilePhone #{phone}
         .profile-actions
           button.back(onclick="goBack()") Back
-          button.edit(onclick="editProfile()") Edit
+          a(href="/users/edit-profile", class="edit") Edit
           button.logout(onclick="logoutUser()") Logout
       .profile-image-section
-        img(src="/images/profile.png", alt="Campus Logo")
+        if user && user.photo
+          img(src=user.photo, alt="Profile Photo", style="width:120px;height:120px;border-radius:50%;")
+        else
+          img(src="/images/profile.png", alt="Campus Logo", style="width:120px;height:120px;border-radius:50%;")
     footer
       p © 2025 Secure My Campus | 
         a(href="#") Privacy Policy

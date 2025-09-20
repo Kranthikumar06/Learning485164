@@ -13,7 +13,7 @@ block content
       if email
         a(href="/form") Form Page
         a(href="/help") Help Center
-      if !email
+      else
         a(href="/users/signup") Sign Up
         a(href="/users/signin") Sign In
     .profile-top-right
@@ -54,14 +54,15 @@ block content
               else
                 .timer(style='font-weight:bold; color:#d9534f; margin-bottom:8px;')
                   | Expired
-            form(method='POST', action='/change-complaint-color', style='display:inline-block; margin-top:10px; margin-right:10px;')
-              input(type='hidden', name='index', value=i)
-              button(type='submit', class='btn btn-success')
-                span Solved
-            form(method='POST', action='/delete-complaint', style='display:inline-block; margin-top:10px;', onsubmit="return confirm('Are you sure you want to delete this complaint?');")
-              input(type='hidden', name='index', value=i)
-              button(type='submit', class='btn btn-danger')
-                span Delete
+              if email
+                form(method='POST', action='/change-complaint-color', style='display:inline-block; margin-top:10px; margin-right:10px;')
+                  input(type='hidden', name='index', value=i)
+                  button(type='submit', class='btn btn-success')
+                    span Solved
+                form(method='POST', action='/delete-complaint', style='display:inline-block; margin-top:10px;', onsubmit="return confirm('Are you sure you want to delete this complaint?');")
+                  input(type='hidden', name='index', value=i)
+                  button(type='submit', class='btn btn-danger')
+                    span Delete
 style.
   .complaint-box {
     border: 4px solid red;
