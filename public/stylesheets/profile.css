@@ -1,3 +1,42 @@
+    .profile-actions .cancel {
+      background: linear-gradient(90deg, #e1bee7 0%, #bfe9ff 100%);
+      color: #555;
+      border-radius: 24px;
+      border: none;
+      font-size: 17px;
+      font-weight: 600;
+      padding: 12px 36px;
+      box-shadow: 0 2px 8px rgba(74,144,226,0.08);
+      transition: background .3s, box-shadow .3s, transform .2s;
+      outline: none;
+      letter-spacing: 2px;
+      text-decoration: none;
+      margin-left: 10px;
+    }
+    .profile-actions .cancel:hover {
+      background: linear-gradient(90deg, #bfe9ff 0%, #e1bee7 100%);
+      color: #007bff;
+      box-shadow: 0 4px 16px rgba(74,144,226,0.12);
+      transform: translateY(-2px) scale(1.07);
+    }
+/* Edit button custom style */
+.profile-actions .btn-success {
+  background: linear-gradient(90deg, #00c6ff 0%, #0072ff 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 28px;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+  transition: background 0.2s, box-shadow 0.2s;
+  margin: 0 10px;
+}
+.profile-actions .btn-success:hover {
+  background: linear-gradient(90deg, #0072ff 0%, #00c6ff 100%);
+  box-shadow: 0 4px 16px rgba(44,62,80,0.18);
+  color: #fff;
+}
  * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; }
     body {
       background: linear-gradient(135deg,#e3f2fd,#e1bee7);
@@ -36,7 +75,7 @@
       letter-spacing: 2px;
       line-height: 1;
       text-align: center;
-      width: 174%;
+  width: 100%;
       animation: fadeInUp 1s;
     }
     .profile-avatar-section {
@@ -139,11 +178,24 @@
       color: #fff;
     }
     .profile-actions .edit {
-      background: linear-gradient(90deg, #ff6e7f 0%, #e1bee7 100%);
-      color: #fff;
+      text-decoration: none;
+      background: linear-gradient(90deg, #bfe9ff 0%, #4a90e2 100%);
+      color: #007bff;
+      border-radius: 24px;
+      border: none;
+      font-size: 17px;
+      font-weight: 600;
+      padding: 12px 36px;
+      box-shadow: 0 2px 8px rgba(74,144,226,0.12);
+      transition: background .3s, box-shadow .3s, transform .2s;
+      outline: none;
+      letter-spacing: 2px;
     }
     .profile-actions .edit:hover {
-      background: linear-gradient(90deg, #e1bee7 0%, #ff6e7f 100%);
+      background: linear-gradient(90deg, #4a90e2 0%, #bfe9ff 100%);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(74,144,226,0.18);
+      transform: translateY(-2px) scale(1.07);
     }
     .profile-image-section {
       display: flex;
