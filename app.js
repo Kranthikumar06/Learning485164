@@ -7,6 +7,7 @@ var session = require('express-session');
 var helmet = require('helmet');
 var passport = require('passport');
 var GoogleStrategy = require('passport-google-oauth20').Strategy;
+const mongoose = require('./mongo');
 
 var indexRouter = require('./app_server/routes/index');
 var usersRouter = require('./app_server/routes/users');
@@ -26,30 +27,24 @@ passport.use(new GoogleStrategy({
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   callbackURL: '/users/auth/google/callback'
 }, function(accessToken, refreshToken, profile, done) {
-  // Save user info to users.json if not already present
-  const filePath = path.join(__dirname, 'data', 'users.json');
-  let users = [];
-  if (fs.existsSync(filePath)) {
-    try {
-      users = JSON.parse(fs.readFileSync(filePath));
-    } catch (e) {
-      users = [];
-    }
-  }
+  // Save user info to MongoDB if not already present
+  const User = require('./models/User');
   const email = profile.emails && profile.emails[0] ? profile.emails[0].value : '';
-  let user = users.find(u => u.email === email);
-  if (!user && email) {
-    user = {
-      name: profile.displayName,
-      email: email,
-      username: profile.id,
-      phone: '',
-      password: '' // No password for Google users
-    };
-    users.push(user);
-    fs.writeFileSync(filePath, JSON.stringify(users, null, 2));
-  }
-  return done(null, profile);
+  if (!email) return done(null, profile);
+  User.findOne({ email }).then(user => {
+    if (!user) {
+      const newUser = new User({
+        name: profile.displayName,
+        email: email,
+        username: profile.id,
+        phone: '',
+        password: '' // No password for Google users
+      });
+      newUser.save().then(() => done(null, profile));
+    } else {
+      done(null, profile);
+    }
+  }).catch(() => done(null, profile));
 }));
 
 passport.serializeUser((user, done) => done(null, user));

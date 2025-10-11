@@ -13,10 +13,10 @@ html(lang="en")
         .profile-fields
           .profile-field
             label User Name
-            .field-value#profileName #{name}
+            .field-value#profileName #{user && user.name ? user.name : 'Not set'}
           .profile-field
             label E-mail
-            .field-value#profileEmail #{email}
+            .field-value#profileEmail #{user && user.email ? user.email : 'Not set'}
           .profile-field
             label Password
             .field-value.password#profilePassword ••••••••
@@ -25,7 +25,7 @@ html(lang="en")
             .field-value#profileLocation #{user && user.location ? user.location : 'Not set'}
           .profile-field
             label Phone
-            .field-value#profilePhone #{phone}
+            .field-value#profilePhone #{user && user.phone ? user.phone : 'Not set'}
         .profile-actions
           button.back(onclick="goBack()") Back
           a(href="/users/edit-profile", class="edit") Edit

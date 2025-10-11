@@ -19,9 +19,12 @@ block content
     .profile-top-right
       if email
         a(href="/profile", title="Profile")
-          img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;")
-  if typeof email !== 'undefined' && email
-    .welcome-user(style="margin:16px 0;font-weight:bold;color:#1976d2;") Welcome, #{email}!
+          if user && user.photo && user.photo !== '' && user.photo !== null
+            img(src=user.photo, alt="Profile Photo", style="width:40px;height:40px;border-radius:50%;background:#eee;")
+          else
+            img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;")
+  if typeof user !== 'undefined' && user && user.name
+    .welcome-user(style="margin:16px 0;font-weight:bold;color:#1976d2;") Welcome, #{user.name}!
   .home-bg-section
     .home-bg-overlay
       p.home-welcome Welcome to Secure My Campus!

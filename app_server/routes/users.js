@@ -1,12 +1,39 @@
+// ...existing code...
+// Place this route after router is defined
+// Email verification route
+// (Move this below 'var router = express.Router();')
 
 const express = require('express');
 const passport = require('passport');
+const bcrypt = require('bcrypt');
+// ...existing code...
+const User = require('../../models/User');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = 'securemycampusjwt';
 var router = express.Router();
+
+// Email verification route
+router.get('/verify', async function(req, res) {
+  const token = req.query.token;
+  if (!token) {
+    return res.render('signin', { title: 'Sign In', error: 'Invalid verification link.' });
+  }
+  try {
+    const user = await User.findOne({ verificationToken: token });
+    if (!user) {
+      return res.render('signin', { title: 'Sign In', error: 'Invalid or expired verification token.' });
+    }
+    user.isVerified = true;
+    user.verificationToken = undefined;
+    await user.save();
+  res.render('signin', { title: 'Sign In', success: 'Email verified! You can now sign in.', email: user.email });
+  } catch (err) {
+  res.render('signin', { title: 'Sign In', error: 'Verification failed: ' + err.message, email: '' });
+  }
+});
 
 const upload = multer({
   dest: path.join(__dirname, '../../public/images/uploads/'),
@@ -33,24 +60,15 @@ router.get('/edit-profile', function(req, res) {
   if (!user) {
     return res.redirect('/users/signin');
   }
-  // Load user from users.json
-  const filePath = path.join(__dirname, '../../data/users.json');
-  let users = [];
-  if (fs.existsSync(filePath)) {
-    try {
-      users = JSON.parse(fs.readFileSync(filePath));
-    } catch (e) {
-      users = [];
-    }
-  }
-  let dbUser = users.find(u => u.email === user.email);
-  res.render('edit_profile', {
-    title: 'Edit Profile',
-    name: dbUser ? dbUser.name : user.name,
-    email: dbUser ? dbUser.email : user.email,
-    location: dbUser ? dbUser.location : '',
-    phone: dbUser ? dbUser.phone : '',
-    user: dbUser || user
+  User.findOne({ email: user.email }).then(dbUser => {
+    res.render('edit_profile', {
+      title: 'Edit Profile',
+      name: dbUser ? dbUser.name : user.name,
+      email: dbUser ? dbUser.email : user.email,
+      location: dbUser ? dbUser.location : '',
+      phone: dbUser ? dbUser.phone : '',
+      user: dbUser || user
+    });
   });
 });
 
@@ -72,25 +90,23 @@ router.post('/edit-profile', upload.single('photo'), function(req, res) {
   if (req.file && req.file.filename) {
     photo = '/images/uploads/' + req.file.filename;
   }
-  // Update user in users.json
-  const filePath = path.join(__dirname, '../../data/users.json');
-  let users = [];
-  if (fs.existsSync(filePath)) {
-    try {
-      users = JSON.parse(fs.readFileSync(filePath));
-    } catch (e) {
-      users = [];
+  console.log('Attempting profile update for:', user.email);
+  console.log('Update data:', { name, location, phone, photo });
+  User.findOneAndUpdate(
+    { email: user.email },
+    { name, location, phone, ...(photo ? { photo } : {}) },
+    { new: true }
+  ).then((updatedUser) => {
+    if (!updatedUser) {
+      console.error('Profile update failed: user not found');
+      return res.render('edit_profile', { title: 'Edit Profile', error: 'User not found.', user });
     }
-  }
-  let dbUser = users.find(u => u.email === user.email);
-  if (dbUser) {
-    dbUser.name = name;
-    dbUser.location = location;
-    dbUser.phone = phone;
-    if (photo) dbUser.photo = photo;
-    fs.writeFileSync(filePath, JSON.stringify(users, null, 2));
-  }
-  res.redirect('/profile');
+    console.log('Profile updated:', updatedUser);
+    res.redirect('/profile');
+  }).catch((err) => {
+    console.error('Profile update error:', err);
+    res.render('edit_profile', { title: 'Edit Profile', error: 'Error updating profile: ' + err.message, user });
+  });
 });
 // Set password for Google users
 router.get('/set-password', function(req, res) {
@@ -151,32 +167,88 @@ router.get('/auth/google',
 
 router.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/users/signin' }),
-  function(req, res) {
-    // Set JWT token cookie for Google user
-    const user = req.user;
+  async function(req, res) {
+    const googleUser = req.user;
+    const email = googleUser.emails[0].value;
+    let dbUser = await User.findOne({ email });
+    if (!dbUser) {
+      // Create new user with isVerified: false and verificationToken
+      const verificationToken = require('crypto').randomBytes(32).toString('hex');
+      dbUser = new User({
+        name: googleUser.displayName,
+        email,
+        username: googleUser.id,
+        phone: '',
+        isVerified: false,
+        verificationToken
+      });
+      await dbUser.save();
+      // Send verification email
+      const nodemailer = require('nodemailer');
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'yourgmail@gmail.com', // replace with your email
+          pass: 'yourpassword' // replace with your email password or app password
+        }
+      });
+      const verifyUrl = `http://${req.headers.host}/users/verify?token=${verificationToken}`;
+      const mailOptions = {
+        from: 'yourgmail@gmail.com',
+        to: email,
+        subject: 'Verify your email for Secure My Campus',
+        html: `<p>Welcome to Secure My Campus!</p><p>Please verify your email by clicking the link below:</p><a href="${verifyUrl}">${verifyUrl}</a>`
+      };
+      transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.error('Error sending verification email:', error);
+        } else {
+          console.log('Verification email sent:', info.response);
+        }
+      });
+  return res.render('signin', { title: 'Sign In', success: 'A verification link has been sent to your email. Please verify before signing in.', email: email });
+    }
+    if (!dbUser.isVerified) {
+      console.log('BLOCKED: Google user not verified:', dbUser.email);
+      // Resend verification email if not verified
+      if (!dbUser.verificationToken) {
+        dbUser.verificationToken = require('crypto').randomBytes(32).toString('hex');
+        await dbUser.save();
+      }
+      const nodemailer = require('nodemailer');
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'kranthikumarsamudrala381@gmail.com', // <-- Replace with your actual Gmail address
+          pass: 'aqmr pjsj hvqy qtnq' // App password provided by user
+        }
+      });
+      const verifyUrl = `http://${req.headers.host}/users/verify?token=${dbUser.verificationToken}`;
+      const mailOptions = {
+        from: 'kranthikumarsamudrala381@gmail.com',
+        to: email,
+        subject: 'Verify your email for Secure My Campus',
+        html: `<p>Welcome to Secure My Campus!</p><p>Please verify your email by clicking the link below:</p><a href="${verifyUrl}">${verifyUrl}</a>`
+      };
+      transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.error('Error sending verification email:', error);
+        } else {
+          console.log('Verification email sent:', info.response);
+        }
+      });
+  return res.render('signin', { title: 'Sign In', success: 'A verification link has been sent to your email. Please verify before signing in.', email: email });
+    }
+    // Only verified users reach here
+    console.log('LOGIN: Google user verified:', dbUser.email);
     const jwt = require('jsonwebtoken');
     const token = jwt.sign({
-      email: user.emails[0].value,
-      name: user.displayName,
-      username: user.id,
-      phone: ''
+      email: dbUser.email,
+      name: dbUser.name,
+      username: dbUser.username,
+      phone: dbUser.phone
     }, JWT_SECRET, { expiresIn: '2h' });
     res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: false, path: '/' });
-    // Check if password is set for this user
-    const filePath = path.join(__dirname, '../../data/users.json');
-    let users = [];
-    if (fs.existsSync(filePath)) {
-      try {
-        users = JSON.parse(fs.readFileSync(filePath));
-      } catch (e) {
-        users = [];
-      }
-    }
-    const dbUser = users.find(u => u.email === user.emails[0].value);
-    if (dbUser && (!dbUser.password || dbUser.password === '')) {
-      // Redirect to set password if not set
-      return res.redirect('/users/set-password');
-    }
     res.redirect('/');
   }
 );
@@ -225,25 +297,59 @@ router.get('/signin', function(req, res) {
 // Signup route
 router.post('/signup', async function(req, res) {
   const { name, username, phone, email, password, confirm_password } = req.body;
-  if (!name || !username || !phone || !email || !password || password !== confirm_password) {
-    return res.render('signup', { title: 'Sign Up', error: 'All fields are required and passwords must match.', email: req.session.email });
+  if (password !== confirm_password) {
+    return res.render('signup', { title: 'Sign Up', error: 'Passwords must match.', email });
   }
-  const filePath = path.join(__dirname, '../../data/users.json');
-  let users = [];
-  if (fs.existsSync(filePath)) {
-    try {
-      users = JSON.parse(fs.readFileSync(filePath));
-    } catch (e) {
-      users = [];
+  if (phone && !/^\d{10}$/.test(phone)) {
+    return res.render('signup', { title: 'Sign Up', error: 'Phone number must be 10 digits.', email });
+  }
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.render('signup', { title: 'Sign Up', error: 'Email already registered.', email });
     }
+    const hashed = await bcrypt.hash(password, 10);
+    // Generate a random verification token
+    const verificationToken = require('crypto').randomBytes(32).toString('hex');
+    const newUser = new User({
+      name,
+      username,
+      phone,
+      email,
+      password: hashed,
+      isVerified: false,
+      verificationToken
+    });
+    await newUser.save();
+
+    // Send verification email
+    const nodemailer = require('nodemailer');
+    // Configure your mail transport (use your real credentials)
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'kranthikumarsamudrala381@gmail.com', // <-- Replace with your actual Gmail address
+        pass: 'aqmr pjsj hvqy qtnq' // App password provided by user
+      }
+    });
+    const verifyUrl = `http://${req.headers.host}/users/verify?token=${verificationToken}`;
+    const mailOptions = {
+      from: 'kranthikumarsamudrala381@gmail.com',
+      to: email,
+      subject: 'Verify your email for Secure My Campus',
+      html: `<p>Welcome to Secure My Campus!</p><p>Please verify your email by clicking the link below:</p><a href="${verifyUrl}">${verifyUrl}</a>`
+    };
+    transporter.sendMail(mailOptions, function(error, info){
+      if (error) {
+        console.error('Error sending verification email:', error);
+      } else {
+        console.log('Verification email sent:', info.response);
+      }
+    });
+    res.redirect('/users/signin');
+  } catch (err) {
+    return res.render('signup', { title: 'Sign Up', error: 'Error creating user: ' + err.message, email });
   }
-  if (users.find(u => u.email === email)) {
-  return res.render('signup', { title: 'Sign Up', error: 'Email already registered.', email: req.session.email });
-  }
-  const hashed = await bcrypt.hash(password, 10);
-  users.push({ name, username, phone, email, password: hashed });
-  fs.writeFileSync(filePath, JSON.stringify(users, null, 2));
-  res.redirect('/users/signin');
 });
 // Logout route
 router.post('/logout', function(req, res) {
@@ -258,29 +364,24 @@ router.post('/signin', async function(req, res) {
   if (!email || !password) {
     return res.render('signin', { title: 'Sign In', error: 'Email and password required.', email: '' });
   }
-  const filePath = path.join(__dirname, '../../data/users.json');
-  let users = [];
-  if (fs.existsSync(filePath)) {
-    try {
-      users = JSON.parse(fs.readFileSync(filePath));
-    } catch (e) {
-      users = [];
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.render('signin', { title: 'Sign In', error: 'Invalid entry. Email or password is incorrect.', email: '' });
     }
+    if (!user.password || user.password === '') {
+      return res.render('signin', { title: 'Sign In', error: 'You must set a password before logging in. Please sign in with Google and set your password.', email });
+    }
+    if (!(await bcrypt.compare(password, user.password))) {
+      return res.render('signin', { title: 'Sign In', error: 'Invalid entry. Email or password is incorrect.', email: '' });
+    }
+    // Issue JWT token
+    const token = jwt.sign({ email: user.email, name: user.name, username: user.username, phone: user.phone }, JWT_SECRET, { expiresIn: '2h' });
+    res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: false });
+    res.redirect('/');
+  } catch (err) {
+    return res.render('signin', { title: 'Sign In', error: 'Error logging in: ' + err.message, email });
   }
-  const user = users.find(u => u.email === email);
-  if (!user) {
-    return res.render('signin', { title: 'Sign In', error: 'Invalid entry. Email or password is incorrect.', email: '' });
-  }
-  if (!user.password || user.password === '') {
-    return res.render('signin', { title: 'Sign In', error: 'You must set a password before logging in. Please sign in with Google and set your password.', email: email });
-  }
-  if (!(await bcrypt.compare(password, user.password))) {
-    return res.render('signin', { title: 'Sign In', error: 'Invalid entry. Email or password is incorrect.', email: '' });
-  }
-  // Issue JWT token
-  const token = jwt.sign({ email: user.email, name: user.name, username: user.username, phone: user.phone }, JWT_SECRET, { expiresIn: '2h' });
-  res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: false });
-  res.redirect('/');
 });
 
 module.exports = router;

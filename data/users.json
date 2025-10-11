@@ -28,5 +28,21 @@
     "password": "$2b$10$NXufBJEZ6ACyeViEmywik.nckhOPkXAvCFz7gTewG5387A0eUTiDO",
     "location": "Hyderabad",
     "photo": "/images/uploads/725cb9b43c091b23680ca03161c34d83"
+  },
+  {
+    "name": "Filmy Don1",
+    "email": "nlpfacts@gmail.com",
+    "username": "110985454127883963525",
+    "phone": "",
+    "password": ""
+  },
+  {
+    "name": "Kranthi kumar Samudrala",
+    "email": "kranthikumarsamudrala381@gmail.com",
+    "username": "110422972513372870141",
+    "phone": "",
+    "password": "",
+    "location": "",
+    "photo": "/images/uploads/7e8ddc808bb9c778a65a85479b518d79"
   }
 ]
