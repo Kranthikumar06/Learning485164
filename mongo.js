@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const mongoURI = process.env.MONGO_URI || 'mongodb+srv://Kranthi:111222333444555@cluster0.zfm5dnk.mongodb.net/';
+const mongoURI = process.env.MONGO_URI;
 
 mongoose.connect(mongoURI, {
   useNewUrlParser: true,
