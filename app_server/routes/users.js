@@ -188,13 +188,13 @@ router.get('/auth/google/callback',
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: 'yourgmail@gmail.com', // replace with your email
-          pass: 'yourpassword' // replace with your email password or app password
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
         }
       });
   const verifyUrl = `${process.env.BASE_URL}/users/verify?token=${verificationToken}`;
       const mailOptions = {
-        from: 'yourgmail@gmail.com',
+  from: process.env.EMAIL_USER,
         to: email,
         subject: 'Verify your email for Secure My Campus',
         html: `<p>Welcome to Secure My Campus!</p><p>Please verify your email by clicking the link below:</p><a href="${verifyUrl}">${verifyUrl}</a>`
@@ -219,13 +219,13 @@ router.get('/auth/google/callback',
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: 'kranthikumarsamudrala381@gmail.com', // <-- Replace with your actual Gmail address
-          pass: 'aqmr pjsj hvqy qtnq' // App password provided by user
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
         }
       });
   const verifyUrl = `${process.env.BASE_URL}/users/verify?token=${dbUser.verificationToken}`;
       const mailOptions = {
-        from: 'kranthikumarsamudrala381@gmail.com',
+  from: process.env.EMAIL_USER,
         to: email,
         subject: 'Verify your email for Secure My Campus',
         html: `<p>Welcome to Secure My Campus!</p><p>Please verify your email by clicking the link below:</p><a href="${verifyUrl}">${verifyUrl}</a>`
@@ -328,13 +328,13 @@ router.post('/signup', async function(req, res) {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'kranthikumarsamudrala381@gmail.com', // <-- Replace with your actual Gmail address
-        pass: 'aqmr pjsj hvqy qtnq' // App password provided by user
+  user: process.env.EMAIL_USER,
+  pass: process.env.EMAIL_PASS
       }
     });
     const verifyUrl = `http://${req.headers.host}/users/verify?token=${verificationToken}`;
     const mailOptions = {
-      from: 'kranthikumarsamudrala381@gmail.com',
+  from: process.env.EMAIL_USER,
       to: email,
       subject: 'Verify your email for Secure My Campus',
       html: `<p>Welcome to Secure My Campus!</p><p>Please verify your email by clicking the link below:</p><a href="${verifyUrl}">${verifyUrl}</a>`
