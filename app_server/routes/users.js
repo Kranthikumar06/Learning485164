@@ -192,7 +192,7 @@ router.get('/auth/google/callback',
           pass: 'yourpassword' // replace with your email password or app password
         }
       });
-      const verifyUrl = `http://${req.headers.host}/users/verify?token=${verificationToken}`;
+  const verifyUrl = `${process.env.BASE_URL}/users/verify?token=${verificationToken}`;
       const mailOptions = {
         from: 'yourgmail@gmail.com',
         to: email,
@@ -223,7 +223,7 @@ router.get('/auth/google/callback',
           pass: 'aqmr pjsj hvqy qtnq' // App password provided by user
         }
       });
-      const verifyUrl = `http://${req.headers.host}/users/verify?token=${dbUser.verificationToken}`;
+  const verifyUrl = `${process.env.BASE_URL}/users/verify?token=${dbUser.verificationToken}`;
       const mailOptions = {
         from: 'kranthikumarsamudrala381@gmail.com',
         to: email,
