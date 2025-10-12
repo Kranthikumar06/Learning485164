@@ -98,8 +98,26 @@ block content
             var img = item.photo || item.img || ''; // support either property name
             var title = item.category || 'Complaint';
             var desc = item.description || '';
+            // compute time left until deletion (use server-provided 'now' when available)
+            var deletionLine = '';
+            try {
+              var expiresAt = item.expiresAt || item.expiry || item.expires || null;
+              var expireMs = expiresAt ? Number(expiresAt) : NaN;
+              if (!isNaN(expireMs)) {
+                var msLeft = expireMs - (now || Date.now());
+                if (msLeft > 0) {
+                  var secondsLeft = Math.floor(msLeft / 1000);
+                  var daysLeft = Math.floor(secondsLeft / (24 * 60 * 60));
+                  var hrsLeft = Math.floor((secondsLeft % (24 * 60 * 60)) / 3600);
+                  deletionLine = '<p><strong>Time left:</strong> ' + daysLeft + ' days ' + hrsLeft + ' hrs</p>';
+                } else {
+                  deletionLine = '<p><strong>Time left:</strong> Expired</p>';
+                }
+              }
+            } catch (e) { deletionLine = ''; }
+
             // include Solve/Delete buttons (styled same as previous back button)
-            return '\n      <div class="card" data-category="'+(item.category||'')+'" data-status="'+((item.color && String(item.color).toLowerCase()==='green')? 'Solved':'Unsolved')+'">\n        <div class="card-inner">\n          <div class="card-front">\n            <img src="'+img+'" alt="'+(title.replace(/"/g,'\"'))+'" onerror="this.onerror=null;this.src=\''+fallback+'\';">\n            <div class="info">\n              <h3>'+title+'</h3>\n              <p>Click to view details</p>\n            </div>\n          </div>\n          <div class="card-back">\n            <h3>Item Details</h3>\n            <p><strong>Date:</strong> '+(item.date||'')+'</p>\n            <p><strong>Phone:</strong> '+(item.phone||'')+'</p>\n            <p><strong>Category:</strong> '+(item.category||'')+'</p>\n            <p><strong>Location:</strong> '+(item.location||'')+'</p>\n            <p>'+(desc)+'<\/p>\n            <p class="status">Status: '+((item.color && String(item.color).toLowerCase()==='green')? 'Solved ✅':'Unsolved ❌')+'<\/p>\n            <div class="card-actions">\n              <button type="button" class="solve-btn">Solve<\/button>\n              <button type="button" class="delete-btn">Delete<\/button>\n            <\/div>\n          <\/div>\n        <\/div>\n      <\/div>\n    ';
+            return '\n      <div class="card" data-category="'+(item.category||'')+'" data-status="'+((item.color && String(item.color).toLowerCase()==='green')? 'Solved':'Unsolved')+'">\n        <div class="card-inner">\n          <div class="card-front">\n            <img src="'+img+'" alt="'+(title.replace(/"/g,'\"'))+'" onerror="this.onerror=null;this.src=\''+fallback+'\';">\n            <div class="info">\n              <h3>'+title+'</h3>\n              <p>Click to view details</p>\n            </div>\n          </div>\n          <div class="card-back">\n            <h3>Details</h3>\n            <p><strong>Date:</strong> '+(item.date||'')+'</p>\n            <p><strong>Phone:</strong> '+(item.phone||'')+'</p>\n            <p><strong>Category:</strong> '+(item.category||'')+'</p>\n            <p><strong>Location:</strong> '+(item.location||'')+'</p>\n            <p><strong>Description:</strong> '+(desc||'')+'</p>\n            '+ deletionLine + '\n            <p class="status">Status: '+((item.color && String(item.color).toLowerCase()==='green')? 'Solved ✅':'Unsolved ❌')+'<\/p>\n            <div class="card-actions">\n              <button type="button" class="solve-btn">Solve<\/button>\n              <button type="button" class="delete-btn">Delete<\/button>\n            <\/div>\n          <\/div>\n        <\/div>\n      <\/div>\n    ';
           }
 
           function renderCards(filterCategory='All', filterStatus='All'){
@@ -200,4 +218,3 @@ block content
       |  |
       a(href="#") Help Center
     script(src="/javascripts/complaint_timer.js")
-
