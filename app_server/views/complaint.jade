@@ -1,6 +1,9 @@
 extends layout
 
 
+block head
+  link(rel='stylesheet', href='/stylesheets/card.css')
+
 block content
   .navbar
     .logo-container
@@ -22,45 +25,106 @@ block content
         a(href="/profile", title="Profile")
           img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;")
   .main-content(style='margin-top:80px;')
-    .complaint-header-row(style='display:flex; align-items:left; margin-bottom:20px; justify-content:flex-start; width:100%; position:relative; top:0; margin-top:0 !important; z-index:10;')
-      h1(style='margin:0; margin-right:24px; margin-top:0 !important;')= typeof title !== 'undefined' ? title : 'Complaint Page'
+    .complaint-header-row(style='display:flex; align-items:center; gap:12px; margin-bottom:20px; justify-content:flex-start; width:100%; position:relative; top:0; margin-top:0 !important; z-index:10;')
+      h1(style='margin:0; margin-right:12px; margin-top:0 !important;')= typeof title !== 'undefined' ? title : 'Complaint Page'
+      // non-JS fallback select (keeps backend behavior)
       form(method='GET', action='/complaint', style='display:flex; align-items:center;')
-        select(name='category', id='category', onchange='this.form.submit()', style='padding:4px 8px;')
+        select(name='category', id='category', style='padding:6px 10px;')
           option(value='') All
           if categories
             each cat in categories
               option(value=cat, selected=(selectedCategory==cat)?true:false)= cat
+    // Filter bar with category + status buttons (client-side controls)
+    .filter-bar
+      .filter-group(data-type='category')
+        span Complaint Type:
+        // dynamic category buttons (render 'All' plus categories)
+        button.active(data-filter='All') All
+        if categories
+          each cat in categories
+            button(data-filter=cat)= cat
+      .filter-group(data-type='status')
+        span Status:
+        button.active(data-filter='All') All
+        button(data-filter='Solved') Solved
+        button(data-filter='Unsolved') Unsolved
     if complaints && complaints.length
-      .complaints-container
+      .page
+        .grid#cardGrid
           each complaint, i in complaints
-            .complaint-box(style=`border-color:${complaint.color||'red'};`)
-              // Email removed
-              if complaint.photo
-                img(src=complaint.photo, alt='Photo', style='max-width:200px;max-height:200px;')
-              p Date: #{complaint.date}
-              p Phone: #{complaint.phone}
-              p Category: #{complaint.category}
-              p Location: #{complaint.location}
-              p Description: #{complaint.description}
-              if complaint.expiresAt
-                - var secondsLeft = Math.max(0, Math.floor((complaint.expiresAt - now) / 1000));
-                - var days = Math.floor(secondsLeft / (24 * 60 * 60));
-                - var hrs = Math.floor((secondsLeft % (24 * 60 * 60)) / 3600);
-                if secondsLeft > 0
-                  .timer.timer-dynamic(style='font-weight:bold; color:#d9534f; margin-bottom:8px;', data-expires-at=(+complaint.expiresAt))
-                    | Time left: #{days} days #{hrs} hrs
-                else
-                  .timer.timer-dynamic(style='font-weight:bold; color:#d9534f; margin-bottom:8px;', data-expires-at=(+complaint.expiresAt))
-                    | Expired
-                if email
-                  form(method='POST', action='/change-complaint-color', style='display:inline-block; margin-top:10px; margin-right:10px;')
-                    input(type='hidden', name='index', value=i)
-                    button(type='submit', class='btn btn-success')
-                      span Solved
-                  form(method='POST', action='/delete-complaint', style='display:inline-block; margin-top:10px;', onsubmit="return confirm('Are you sure you want to delete this complaint?');")
-                    input(type='hidden', name='index', value=i)
-                    button(type='submit', class='btn btn-danger')
-                      span Delete
+            - var status = (complaint.color && (String(complaint.color).toLowerCase()==='green')) ? 'Solved' : 'Unsolved';
+            .card(data-category=complaint.category, data-status=status)
+              .card-inner
+                .card-front
+                  if complaint.photo
+                    img(src=complaint.photo, alt='Photo')
+                  .info
+                    h3= complaint.category
+                    p #{(complaint.description && complaint.description.length>140) ? complaint.description.substring(0,137) + '...' : complaint.description}
+                .card-back
+                  h3= complaint.category
+                  p Location: #{complaint.location}
+                  p Phone: #{complaint.phone}
+                  p Date: #{complaint.date}
+                  p Description: #{complaint.description}
+                  if complaint.expiresAt
+                    - var secondsLeft = Math.max(0, Math.floor((complaint.expiresAt - now) / 1000));
+                    - var days = Math.floor(secondsLeft / (24 * 60 * 60));
+                    - var hrs = Math.floor((secondsLeft % (24 * 60 * 60)) / 3600);
+                    if secondsLeft > 0
+                      .timer(style='font-weight:bold; color:#d9534f; margin-bottom:8px;', data-expires-at=(+complaint.expiresAt))
+                        | Time left: #{days} days #{hrs} hrs
+                    else
+                      .timer(style='font-weight:bold; color:#d9534f; margin-bottom:8px;', data-expires-at=(+complaint.expiresAt))
+                        | Expired
+                  if email
+                    form(method='POST', action='/change-complaint-color', style='display:inline-block; margin-top:10px; margin-right:10px;')
+                      input(type='hidden', name='index', value=i)
+                      button(type='submit', class='btn btn-success') Solved
+                    form(method='POST', action='/delete-complaint', style='display:inline-block; margin-top:10px;', onsubmit="return confirm('Are you sure you want to delete this complaint?');")
+                      input(type='hidden', name='index', value=i)
+                      button(type='submit', class='btn btn-danger') Delete
+      // embed complaints for potential client-side use (no backend change)
+      script.
+        window.__COMPLAINTS = !{JSON.stringify(complaints || [])};
+        window.__NOW = !{(typeof now !== 'undefined' ? now : Date.now())};
+      // client filter script: toggles category/status buttons and shows/hides cards
+      script.
+        (function(){
+          var groups = document.querySelectorAll('.filter-group');
+          var cards = document.querySelectorAll('.card');
+          function getActiveFilter(type){
+            var g = document.querySelector('.filter-group[data-type="'+type+'"]');
+            if(!g) return 'All';
+            var b = g.querySelector('button.active');
+            return b ? b.getAttribute('data-filter') : 'All';
+          }
+          function applyFilters(){
+            var cat = getActiveFilter('category');
+            var status = getActiveFilter('status');
+            cards.forEach(function(card){
+              var c = card.getAttribute('data-category') || '';
+              var s = card.getAttribute('data-status') || '';
+              var show = true;
+              if(cat && cat !== 'All') show = show && (c === cat);
+              if(status && status !== 'All') show = show && (s === status);
+              card.style.display = show ? '' : 'none';
+            });
+          }
+          groups.forEach(function(g){
+            g.addEventListener('click', function(ev){
+              var btn = ev.target.closest('button');
+              if(!btn) return;
+              // deactivate siblings
+              var sibs = g.querySelectorAll('button');
+              sibs.forEach(function(s){ s.classList.remove('active'); });
+              btn.classList.add('active');
+              applyFilters();
+            });
+          });
+          // initial filter apply
+          applyFilters();
+        })();
     else
       p No complaints submitted yet.
   footer
