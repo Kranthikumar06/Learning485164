@@ -88,42 +88,56 @@ block content
       script.
         window.__COMPLAINTS = !{JSON.stringify(complaints || [])};
         window.__NOW = !{(typeof now !== 'undefined' ? now : Date.now())};
-      // client filter script: toggles category/status buttons and shows/hides cards
+      // client-side renderer & filters adapted from card.html
       script.
         (function(){
-          var groups = document.querySelectorAll('.filter-group');
-          var cards = document.querySelectorAll('.card');
-          function getActiveFilter(type){
-            var g = document.querySelector('.filter-group[data-type="'+type+'"]');
-            if(!g) return 'All';
-            var b = g.querySelector('button.active');
-            return b ? b.getAttribute('data-filter') : 'All';
+          var items = window.__COMPLAINTS || [];
+          var now = window.__NOW || Date.now();
+          var grid = document.getElementById('cardGrid');
+          if(!grid) return;
+
+          function cardTemplate(item){
+            var fallback = 'https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=800&q=60';
+            var img = item.photo || item.img || ''; // support either property name
+            var title = item.category || 'Complaint';
+            var desc = item.description || '';
+            return '\n      <div class="card" data-category="'+(item.category||'')+'" data-status="'+((item.color && String(item.color).toLowerCase()==='green')? 'Solved':'Unsolved')+'">\n        <div class="card-inner">\n          <div class="card-front">\n            <img src="'+img+'" alt="'+(title.replace(/"/g,'\"'))+'" onerror="this.onerror=null;this.src=\''+fallback+'\';">\n            <div class="info">\n              <h3>'+title+'</h3>\n              <p>Click to view details</p>\n            </div>\n          </div>\n          <div class="card-back">\n            <h3>Item Details</h3>\n            <p><strong>Date:</strong> '+(item.date||'')+'</p>\n            <p><strong>Phone:</strong> '+(item.phone||'')+'</p>\n            <p><strong>Category:</strong> '+(item.category||'')+'</p>\n            <p><strong>Location:</strong> '+(item.location||'')+'</p>\n            <p>'+(desc)+'<\/p>\n            <p class="status">Status: '+((item.color && String(item.color).toLowerCase()==='green')? 'Solved ✅':'Unsolved ❌')+'<\/p>\n            <button type="button">Back<\/button>\n          <\/div>\n        <\/div>\n      <\/div>\n    ';
           }
-          function applyFilters(){
-            var cat = getActiveFilter('category');
-            var status = getActiveFilter('status');
-            cards.forEach(function(card){
-              var c = card.getAttribute('data-category') || '';
-              var s = card.getAttribute('data-status') || '';
-              var show = true;
-              if(cat && cat !== 'All') show = show && (c === cat);
-              if(status && status !== 'All') show = show && (s === status);
-              card.style.display = show ? '' : 'none';
+
+          function renderCards(filterCategory='All', filterStatus='All'){
+            grid.innerHTML = '';
+            var filtered = items.filter(function(it){
+              var cat = (filterCategory==='All') || (it.category===filterCategory);
+              var stat = (filterStatus==='All') || ((filterStatus==='Solved') ? !!it.solved || (it.color && String(it.color).toLowerCase()==='green') : !(!!it.solved || (it.color && String(it.color).toLowerCase()==='green')));
+              return cat && stat;
+            });
+            filtered.forEach(function(it){
+              var wrap = document.createElement('div');
+              wrap.innerHTML = cardTemplate(it).trim();
+              var card = wrap.firstElementChild;
+              grid.appendChild(card);
+
+              var backBtn = card.querySelector('.card-back button');
+              card.addEventListener('click', function(){ card.classList.toggle('flipped'); });
+              if(backBtn){ backBtn.addEventListener('click', function(e){ e.stopPropagation(); card.classList.remove('flipped'); }); }
             });
           }
-          groups.forEach(function(g){
-            g.addEventListener('click', function(ev){
-              var btn = ev.target.closest('button');
-              if(!btn) return;
-              // deactivate siblings
-              var sibs = g.querySelectorAll('button');
-              sibs.forEach(function(s){ s.classList.remove('active'); });
-              btn.classList.add('active');
-              applyFilters();
+
+          // wire up filter buttons
+          document.querySelectorAll('.filter-group').forEach(function(group){
+            group.querySelectorAll('button').forEach(function(btn){
+              btn.addEventListener('click', function(){
+                group.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
+                btn.classList.add('active');
+                var cat = document.querySelector(".filter-group[data-type='category'] .active").dataset.filter;
+                var stat = document.querySelector(".filter-group[data-type='status'] .active").dataset.filter;
+                renderCards(cat, stat);
+              });
             });
           });
-          // initial filter apply
-          applyFilters();
+
+          // initial render using server categories if present
+          renderCards();
         })();
     else
       p No complaints submitted yet.
