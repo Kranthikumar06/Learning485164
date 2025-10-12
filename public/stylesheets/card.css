@@ -71,7 +71,7 @@
   .card-front:hover img{ transform: scale(1.1); }
   .card-front .info{
     position:absolute; left:0; right:0; bottom:0; padding:14px;
-    color:#fff;
+    color:#0c0d19;
     background: linear-gradient(to top, rgba(0,0,0,.7), transparent 60%);
   }
   .card-front .info h3{ margin:0 0 4px; font-size:20px; font-weight:800; }
