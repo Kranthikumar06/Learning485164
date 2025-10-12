@@ -1,5 +1,8 @@
 extends layout
 
+block head
+  link(rel='stylesheet', href='/stylesheets/helpcenter.css')
+
 block content
   .navbar
     .logo-container
@@ -13,8 +16,7 @@ block content
       if email
         a(href="/form") Form Page
         a(href="/help") Help Center
-        a(href="/profile", title="Profile") Profile
-      if !email
+      else
         a(href="/users/signup") Sign Up
         a(href="/users/signin") Sign In
     .profile-top-right
@@ -22,12 +24,21 @@ block content
         a(href="/profile", title="Profile")
           img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;")
 
+  // Chat Section compatible with helpcenter.css / helpcenter.js
+  .content
+    .chat-box#chatBox
+      .message.bot 👋 Hello! I’m your Secure Campus Assistant. How can I help you today?
 
+    .chat-input-wrapper
+      input#userInput(type="text", placeholder="Type your message...", autocomplete="off")
+      button#sendBtn ➤
 
-  .page-title Chatbot
-  #conversation
-  .input-bar
-    .input-bar-inner
-      input#inputBox(type="text", placeholder="Type your message...", onkeydown="if(event.key==='Enter'){sendToPython();}")
-      button(type="button", onclick="sendToPython()") Send
-  script(src="/javascripts/chatbot.js")
+  // Footer
+  footer
+    p
+      | © 2025 Secure My Campus |
+      a(href="#") Privacy Policy
+      |  |
+      a(href="#") Help Center
+
+  script(src="/javascripts/helpcenter.js")

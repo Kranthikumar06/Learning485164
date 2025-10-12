@@ -12,10 +12,6 @@ block content
       a(href="/complaint") Complaint Box
       a(href="/users/signup") Sign Up
       a(href="/users/signin") Sign In
-    .profile-top-right
-      if email
-        a(href="/profile", title="Profile")
-          img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;")
   .content
     .login-card
       if typeof error !== 'undefined' && error
