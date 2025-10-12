@@ -1,42 +1,50 @@
 extends layout
 
+block head
+  link(rel='stylesheet', href='/stylesheets/editprofile.css')
+
 block content
   .profile-container
-    div(style="flex:1;")
+    .profile-left
       .profile-title Edit Profile
-      form(action="/users/edit-profile", method="POST", enctype="multipart/form-data", style="max-width:400px;margin:auto;")
+      form(action="/users/edit-profile", method="POST", enctype="multipart/form-data")
         .profile-fields
           .profile-field
-            label(for="name") User Name
-            input(type="text", name="name", id="name", value=name, required)
+            label User Name
+            .field-value= name || 'Not provided'
           .profile-field
-            label(for="email") E-mail
-            input(type="email", name="email", id="email", value=email, readonly)
+            label E-mail
+            .field-value= email || 'Not provided'
           .profile-field
-            label(for="location") Location
-            input(type="text", name="location", id="location", value=location)
+            label Password
+            .field-value
+              | ••••••••
+              a.change-password(href="/users/set-password") Change Password
           .profile-field
-            label(for="phone") Phone
-            input(type="text", name="phone", id="phone", value=phone)
+            label Location
+            .field-value= location || ''
           .profile-field
-            label(for="photo") Profile Photo
+            label Phone
+            .field-value= phone || ''
+          .profile-field
+            label Profile Photo
             input(type="file", name="photo", id="photo", accept="image/*")
         .profile-actions
-          button(type="submit", class="edit") Save Changes
-          button(type="button", class="cancel", onclick="window.location.href='/profile'") Cancel
+          button(type="submit", class="edit btn-success") Save Changes
+          button(type="button", class="back", onclick="window.location.href='/profile'") Cancel
+
     .profile-image-section
       if user && user.photo
-        img(src=user.photo, alt="Profile Photo", style="width:120px;height:120px;border-radius:50%;")
+        img.profile-avatar(src=user.photo, alt="Profile Photo")
       else
-        img(src="/images/profile.png", alt="Campus Logo", style="width:120px;height:120px;border-radius:50%;")
+        img.profile-avatar(src="/images/profile.png", alt="Profile Photo")
+
+  // footer stays outside the card and is part of the page layout
   footer
     p © 2025 Secure My Campus | 
       a(href="#") Privacy Policy
       |  
       a(href="#") Help Center
 
-.profile-actions .edit {
-  min-width: 400px;
-  padding: 16px 120px;
-  font-size: 22px;
-}
+block scripts
+  script(src='/javascripts/profile.js')

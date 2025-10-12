@@ -72,7 +72,7 @@ router.get('/edit-profile', function(req, res) {
   });
 });
 
-router.post('/edit-profile', upload.single('photo'), function(req, res) {
+router.post('/edit-profile', upload.single('photo'), async function(req, res) {
   let user = null;
   if (req.cookies && req.cookies.token) {
     try {
@@ -85,28 +85,42 @@ router.post('/edit-profile', upload.single('photo'), function(req, res) {
   if (!user) {
     return res.redirect('/users/signin');
   }
-  const { name, location, phone } = req.body;
+  const { name, location, phone, password, confirm_password } = req.body;
   let photo = '';
   if (req.file && req.file.filename) {
     photo = '/images/uploads/' + req.file.filename;
   }
   console.log('Attempting profile update for:', user.email);
-  console.log('Update data:', { name, location, phone, photo });
-  User.findOneAndUpdate(
-    { email: user.email },
-    { name, location, phone, ...(photo ? { photo } : {}) },
-    { new: true }
-  ).then((updatedUser) => {
+  try {
+    console.log('Update data:', { name, location, phone, photo, passwordProvided: !!password });
+
+    // If a new password is provided, validate and hash it
+    let updateObj = { name, location, phone, ...(photo ? { photo } : {}) };
+    if (password && password.length > 0) {
+      if (password !== confirm_password) {
+        return res.render('edit_profile', { title: 'Edit Profile', error: 'Passwords must match.', user, name, email: user.email, location, phone });
+      }
+      const hashed = await bcrypt.hash(password, 10);
+      updateObj.password = hashed;
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
+      { email: user.email },
+      updateObj,
+      { new: true }
+    );
+
     if (!updatedUser) {
       console.error('Profile update failed: user not found');
       return res.render('edit_profile', { title: 'Edit Profile', error: 'User not found.', user });
     }
+
     console.log('Profile updated:', updatedUser);
-    res.redirect('/profile');
-  }).catch((err) => {
+    return res.redirect('/profile');
+  } catch (err) {
     console.error('Profile update error:', err);
-    res.render('edit_profile', { title: 'Edit Profile', error: 'Error updating profile: ' + err.message, user });
-  });
+    return res.render('edit_profile', { title: 'Edit Profile', error: 'Error updating profile: ' + err.message, user });
+  }
 });
 // Set password for Google users
 router.get('/set-password', function(req, res) {
@@ -142,23 +156,22 @@ router.post('/set-password', async function(req, res) {
   if (!password || password !== confirm_password) {
     return res.render('set_password', { title: 'Set Password', error: 'Passwords must match.', email: user.email });
   }
-  const filePath = path.join(__dirname, '../../data/users.json');
-  let users = [];
-  if (fs.existsSync(filePath)) {
-    try {
-      users = JSON.parse(fs.readFileSync(filePath));
-    } catch (e) {
-      users = [];
+  try {
+    // Update MongoDB user password
+    const hashed = await bcrypt.hash(password, 10);
+    const updated = await User.findOneAndUpdate(
+      { email: user.email },
+      { password: hashed },
+      { new: true }
+    );
+    if (!updated) {
+      return res.render('set_password', { title: 'Set Password', error: 'User not found.', email: user.email });
     }
+    return res.redirect('/profile');
+  } catch (err) {
+    console.error('Error setting password:', err);
+    return res.render('set_password', { title: 'Set Password', error: 'Error setting password: ' + err.message, email: user.email });
   }
-  let dbUser = users.find(u => u.email === user.email);
-  if (!dbUser) {
-    return res.render('set_password', { title: 'Set Password', error: 'User not found.', email: user.email });
-  }
-  const hashed = await bcrypt.hash(password, 10);
-  dbUser.password = hashed;
-  fs.writeFileSync(filePath, JSON.stringify(users, null, 2));
-  res.redirect('/profile');
 });
 // Google OAuth routes
 router.get('/auth/google',
