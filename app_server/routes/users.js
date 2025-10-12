@@ -183,29 +183,23 @@ router.get('/auth/google/callback',
         verificationToken
       });
       await dbUser.save();
-      // Send verification email
-      const nodemailer = require('nodemailer');
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS
-        }
-      });
-  const verifyUrl = `${process.env.BASE_URL}/users/verify?token=${verificationToken}`;
-      const mailOptions = {
-  from: process.env.EMAIL_USER,
+      // Send verification email using SendGrid
+      const sgMail = require('@sendgrid/mail');
+      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+      const verifyUrl = `${process.env.BASE_URL}/users/verify?token=${verificationToken}`;
+      const msg = {
         to: email,
+        from: process.env.EMAIL_USER, // Must be a verified sender in SendGrid
         subject: 'Verify your email for Secure My Campus',
         html: `<p>Welcome to Secure My Campus!</p><p>Please verify your email by clicking the link below:</p><a href="${verifyUrl}">${verifyUrl}</a>`
       };
-      transporter.sendMail(mailOptions, function(error, info){
-        if (error) {
+      sgMail.send(msg)
+        .then(() => {
+          console.log('Verification email sent');
+        })
+        .catch((error) => {
           console.error('Error sending verification email:', error);
-        } else {
-          console.log('Verification email sent:', info.response);
-        }
-      });
+        });
   return res.render('signin', { title: 'Sign In', success: 'A verification link has been sent to your email. Please verify before signing in.', email: email });
     }
     if (!dbUser.isVerified) {
@@ -215,28 +209,23 @@ router.get('/auth/google/callback',
         dbUser.verificationToken = require('crypto').randomBytes(32).toString('hex');
         await dbUser.save();
       }
-      const nodemailer = require('nodemailer');
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS
-        }
-      });
-  const verifyUrl = `${process.env.BASE_URL}/users/verify?token=${dbUser.verificationToken}`;
-      const mailOptions = {
-  from: process.env.EMAIL_USER,
+      // Send verification email using SendGrid
+      const sgMail = require('@sendgrid/mail');
+      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+      const verifyUrl = `${process.env.BASE_URL}/users/verify?token=${dbUser.verificationToken}`;
+      const msg = {
         to: email,
+        from: process.env.EMAIL_USER, // Must be a verified sender in SendGrid
         subject: 'Verify your email for Secure My Campus',
         html: `<p>Welcome to Secure My Campus!</p><p>Please verify your email by clicking the link below:</p><a href="${verifyUrl}">${verifyUrl}</a>`
       };
-      transporter.sendMail(mailOptions, function(error, info){
-        if (error) {
+      sgMail.send(msg)
+        .then(() => {
+          console.log('Verification email sent');
+        })
+        .catch((error) => {
           console.error('Error sending verification email:', error);
-        } else {
-          console.log('Verification email sent:', info.response);
-        }
-      });
+        });
   return res.render('signin', { title: 'Sign In', success: 'A verification link has been sent to your email. Please verify before signing in.', email: email });
     }
     // Only verified users reach here
@@ -322,30 +311,23 @@ router.post('/signup', async function(req, res) {
     });
     await newUser.save();
 
-    // Send verification email
-    const nodemailer = require('nodemailer');
-    // Configure your mail transport (use your real credentials)
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-  user: process.env.EMAIL_USER,
-  pass: process.env.EMAIL_PASS
-      }
-    });
-    const verifyUrl = `http://${req.headers.host}/users/verify?token=${verificationToken}`;
-    const mailOptions = {
-  from: process.env.EMAIL_USER,
+    // Send verification email using SendGrid
+    const sgMail = require('@sendgrid/mail');
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    const verifyUrl = `${process.env.BASE_URL}/users/verify?token=${verificationToken}`;
+    const msg = {
       to: email,
+      from: process.env.EMAIL_USER, // Must be a verified sender in SendGrid
       subject: 'Verify your email for Secure My Campus',
       html: `<p>Welcome to Secure My Campus!</p><p>Please verify your email by clicking the link below:</p><a href="${verifyUrl}">${verifyUrl}</a>`
     };
-    transporter.sendMail(mailOptions, function(error, info){
-      if (error) {
+    sgMail.send(msg)
+      .then(() => {
+        console.log('Verification email sent');
+      })
+      .catch((error) => {
         console.error('Error sending verification email:', error);
-      } else {
-        console.log('Verification email sent:', info.response);
-      }
-    });
+      });
     res.redirect('/users/signin');
   } catch (err) {
     return res.render('signup', { title: 'Sign Up', error: 'Error creating user: ' + err.message, email });
