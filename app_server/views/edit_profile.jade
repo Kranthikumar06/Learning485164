@@ -11,21 +11,22 @@ block content
         .profile-fields
           .profile-field
             label User Name
-            .field-value= name || 'Not provided'
+            input(type="text", name="name", id="name", value=name || '', required)
           .profile-field
             label E-mail
-            .field-value= email || 'Not provided'
+            input(type="email", name="email", id="email", value=email || '', required)
           .profile-field
-            label Password
-            .field-value
-              | ••••••••
-              a.change-password(href="/users/set-password") Change Password
+            label Password (leave blank to keep current)
+            input(type="password", name="password", id="password", placeholder="New password")
+          .profile-field
+            label Confirm Password
+            input(type="password", name="confirm_password", id="confirm_password", placeholder="Confirm new password")
           .profile-field
             label Location
-            .field-value= location || ''
+            input(type="text", name="location", id="location", value=location || '')
           .profile-field
             label Phone
-            .field-value= phone || ''
+            input(type="tel", name="phone", id="phone", value=phone || '')
           .profile-field
             label Profile Photo
             input(type="file", name="photo", id="photo", accept="image/*")
