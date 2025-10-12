@@ -5,6 +5,7 @@ block head
   link(rel='stylesheet', href='/stylesheets/card.css')
 
 block content
+  
   .navbar
     .logo-container
       img(src="/images/Campus.png", alt="Secure My Campus Logo")
@@ -23,17 +24,11 @@ block content
     .profile-top-right
       if email
         a(href="/profile", title="Profile")
-          img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;")
+          if typeof user !== 'undefined' && user && user.photo && user.photo !== '' && user.photo !== null
+            img(src=user.photo, alt="Profile Photo", style="width:40px;height:40px;border-radius:50%;background:#eee;")
+          else
+            img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;")
   .main-content(style='margin-top:80px;')
-    .complaint-header-row(style='display:flex; align-items:center; gap:12px; margin-bottom:20px; justify-content:flex-start; width:100%; position:relative; top:0; margin-top:0 !important; z-index:10;')
-      h1(style='margin:0; margin-right:12px; margin-top:0 !important;')= typeof title !== 'undefined' ? title : 'Complaint Page'
-      // non-JS fallback select (keeps backend behavior)
-      form(method='GET', action='/complaint', style='display:flex; align-items:center;')
-        select(name='category', id='category', style='padding:6px 10px;')
-          option(value='') All
-          if categories
-            each cat in categories
-              option(value=cat, selected=(selectedCategory==cat)?true:false)= cat
     // Filter bar with category + status buttons (client-side controls)
     .filter-bar
       .filter-group(data-type='category')
@@ -88,20 +83,23 @@ block content
       script.
         window.__COMPLAINTS = !{JSON.stringify(complaints || [])};
         window.__NOW = !{(typeof now !== 'undefined' ? now : Date.now())};
+        window.__EMAIL = !{JSON.stringify(email || '')};
       // client-side renderer & filters adapted from card.html
       script.
         (function(){
           var items = window.__COMPLAINTS || [];
           var now = window.__NOW || Date.now();
+          var loggedIn = !!(window.__EMAIL);
           var grid = document.getElementById('cardGrid');
           if(!grid) return;
 
           function cardTemplate(item){
-            var fallback = 'https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=800&q=60';
+            var fallback = '/images/Campus.png';
             var img = item.photo || item.img || ''; // support either property name
             var title = item.category || 'Complaint';
             var desc = item.description || '';
-            return '\n      <div class="card" data-category="'+(item.category||'')+'" data-status="'+((item.color && String(item.color).toLowerCase()==='green')? 'Solved':'Unsolved')+'">\n        <div class="card-inner">\n          <div class="card-front">\n            <img src="'+img+'" alt="'+(title.replace(/"/g,'\"'))+'" onerror="this.onerror=null;this.src=\''+fallback+'\';">\n            <div class="info">\n              <h3>'+title+'</h3>\n              <p>Click to view details</p>\n            </div>\n          </div>\n          <div class="card-back">\n            <h3>Item Details</h3>\n            <p><strong>Date:</strong> '+(item.date||'')+'</p>\n            <p><strong>Phone:</strong> '+(item.phone||'')+'</p>\n            <p><strong>Category:</strong> '+(item.category||'')+'</p>\n            <p><strong>Location:</strong> '+(item.location||'')+'</p>\n            <p>'+(desc)+'<\/p>\n            <p class="status">Status: '+((item.color && String(item.color).toLowerCase()==='green')? 'Solved ✅':'Unsolved ❌')+'<\/p>\n            <button type="button">Back<\/button>\n          <\/div>\n        <\/div>\n      <\/div>\n    ';
+            // include Solve/Delete buttons (styled same as previous back button)
+            return '\n      <div class="card" data-category="'+(item.category||'')+'" data-status="'+((item.color && String(item.color).toLowerCase()==='green')? 'Solved':'Unsolved')+'">\n        <div class="card-inner">\n          <div class="card-front">\n            <img src="'+img+'" alt="'+(title.replace(/"/g,'\"'))+'" onerror="this.onerror=null;this.src=\''+fallback+'\';">\n            <div class="info">\n              <h3>'+title+'</h3>\n              <p>Click to view details</p>\n            </div>\n          </div>\n          <div class="card-back">\n            <h3>Item Details</h3>\n            <p><strong>Date:</strong> '+(item.date||'')+'</p>\n            <p><strong>Phone:</strong> '+(item.phone||'')+'</p>\n            <p><strong>Category:</strong> '+(item.category||'')+'</p>\n            <p><strong>Location:</strong> '+(item.location||'')+'</p>\n            <p>'+(desc)+'<\/p>\n            <p class="status">Status: '+((item.color && String(item.color).toLowerCase()==='green')? 'Solved ✅':'Unsolved ❌')+'<\/p>\n            <div class="card-actions">\n              <button type="button" class="solve-btn">Solve<\/button>\n              <button type="button" class="delete-btn">Delete<\/button>\n            <\/div>\n          <\/div>\n        <\/div>\n      <\/div>\n    ';
           }
 
           function renderCards(filterCategory='All', filterStatus='All'){
@@ -117,9 +115,63 @@ block content
               var card = wrap.firstElementChild;
               grid.appendChild(card);
 
-              var backBtn = card.querySelector('.card-back button');
+              // interactions
               card.addEventListener('click', function(){ card.classList.toggle('flipped'); });
-              if(backBtn){ backBtn.addEventListener('click', function(e){ e.stopPropagation(); card.classList.remove('flipped'); }); }
+
+              // wire Solve button -> submit POST to /change-complaint-color
+              var solveBtn = card.querySelector('.solve-btn');
+              if(solveBtn){
+                solveBtn.addEventListener('click', function(e){
+                  e.stopPropagation();
+                  if(!loggedIn){ window.location.href = '/users/signin'; return; }
+                  var idx = items.indexOf(it);
+                  // send AJAX POST so we can update UI instantly
+                  try{
+                    fetch('/change-complaint-color', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                      body: new URLSearchParams({ index: idx }),
+                      credentials: 'same-origin'
+                    }).then(function(resp){
+                      if(!resp.ok){ throw new Error('Network response was not ok'); }
+                      // mark locally as solved and re-render with current filters
+                      items[idx].color = 'green';
+                      items[idx].solved = true;
+                      var cat = document.querySelector(".filter-group[data-type='category'] .active").dataset.filter;
+                      var stat = document.querySelector(".filter-group[data-type='status'] .active").dataset.filter;
+                      renderCards(cat, stat);
+                    }).catch(function(err){
+                      console.error('Failed to mark solved:', err);
+                      alert('Failed to mark complaint as solved. Please try again.');
+                    });
+                  }catch(ex){
+                    console.error(ex);
+                    alert('Error updating complaint.');
+                  }
+                });
+              }
+
+              // wire Delete button -> submit POST to /delete-complaint
+              var deleteBtn = card.querySelector('.delete-btn');
+              if(deleteBtn){
+                deleteBtn.addEventListener('click', function(e){
+                  e.stopPropagation();
+                  if(!loggedIn){ window.location.href = '/users/signin'; return; }
+                  if(!confirm('Are you sure you want to delete this complaint?')) return;
+                  var idx = items.indexOf(it);
+                  var form = document.createElement('form');
+                  form.method = 'POST';
+                  form.action = '/delete-complaint';
+                  form.style.display = 'none';
+                  var input = document.createElement('input');
+                  input.type = 'hidden';
+                  input.name = 'index';
+                  input.value = idx;
+                  form.appendChild(input);
+                  document.body.appendChild(form);
+                  form.submit();
+                });
+              }
             });
           }
 
