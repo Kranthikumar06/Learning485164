@@ -37,15 +37,59 @@ router.get('/complaint', function(req, res) {
 			user = null;
 		}
 	}
+
+	// If not logged in, redirect to sign in
+	if (!user) {
+		return res.redirect('/users/signin');
+	}
+
 	const selectedCategory = req.query.category || '';
 	const now = Date.now();
+
+	// Get all non-expired complaints
 	Complaint.find({ $or: [ { expiresAt: { $gt: now } }, { expiresAt: { $exists: false } } ] }).then(complaints => {
-		let categories = [...new Set(complaints.map(c => c.category).filter(Boolean))];
 		let filteredComplaints = complaints;
-		if (selectedCategory) {
-			filteredComplaints = complaints.filter(c => c.category === selectedCategory);
+
+		// Filter complaints based on user role
+		if (user.role === 'student') {
+			// Students can't see harassment or faculty complaints
+			filteredComplaints = complaints.filter(c => 
+				c.category.toLowerCase() !== 'harassment' && 
+				c.category.toLowerCase() !== 'faculty'
+			);
 		}
-		res.render('complaint', { title: 'Complaint', complaints: filteredComplaints, categories, selectedCategory, now, email: user ? user.email : null });
+		// Admin and faculty can see all complaints
+
+		// Apply category filter if selected
+		if (selectedCategory) {
+			filteredComplaints = filteredComplaints.filter(c => c.category === selectedCategory);
+		}
+
+		// Get available categories based on user role
+		let categories;
+		if (user.role === 'student') {
+			// Filter out restricted categories for students
+			categories = [...new Set(complaints
+				.map(c => c.category)
+				.filter(Boolean)
+				.filter(cat => 
+					cat.toLowerCase() !== 'harassment' && 
+					cat.toLowerCase() !== 'faculty'
+				))];
+		} else {
+			// Admin and faculty see all categories
+			categories = [...new Set(complaints.map(c => c.category).filter(Boolean))];
+		}
+
+		res.render('complaint', { 
+			title: 'Complaint', 
+			complaints: filteredComplaints, 
+			categories, 
+			selectedCategory, 
+			now, 
+			email: user.email,
+			user: user // Pass the full user object to the view
+		});
 	});
 });
 
@@ -79,31 +123,67 @@ const upload = multer({
 	}
 });
 router.post('/submit-incident', upload.single('photo'), function(req, res) {
-	// For file uploads, use multer (not implemented here)
-		const { name, phone, date, email, category, location, description } = req.body;
-		let photo = '';
-		if (req.file && req.file.filename) {
-			photo = '/images/uploads/' + req.file.filename;
-		} else if (req.body.photo) {
-			photo = req.body.photo;
+	// Verify user is logged in and has proper role
+	let user = null;
+	if (req.cookies && req.cookies.token) {
+		try {
+			user = jwt.verify(req.cookies.token, JWT_SECRET);
+		} catch (e) {
+			user = null;
 		}
-		const now = Date.now();
-		const expiresAt = now + 7 * 24 * 60 * 60 * 1000; // 7 days from now
-		const complaint = new Complaint({
-			phone,
-			date,
-			email,
-			category,
-			location,
-			description,
-			photo,
-			color: 'red',
-			expiresAt,
-			status: 'unsolved'
+	}
+
+	if (!user) {
+		return res.redirect('/users/signin');
+	}
+
+	const { name, phone, date, email, category, location, description } = req.body;
+
+	// Check if student is trying to submit restricted categories
+	if (user.role === 'student' && 
+		(category.toLowerCase() === 'harassment' || category.toLowerCase() === 'faculty')) {
+		return res.render('form', {
+			title: 'Form',
+			error: 'Students are not allowed to submit complaints in this category.',
+			email: user.email,
+			user: user
 		});
-		complaint.save().then(() => {
-			res.redirect('/complaint');
+	}
+
+	let photo = '';
+	if (req.file && req.file.filename) {
+		photo = '/images/uploads/' + req.file.filename;
+	} else if (req.body.photo) {
+		photo = req.body.photo;
+	}
+
+	const now = Date.now();
+	const expiresAt = now + 7 * 24 * 60 * 60 * 1000; // 7 days from now
+
+	const complaint = new Complaint({
+		phone,
+		date,
+		email,
+		category,
+		location,
+		description,
+		photo,
+		color: 'red',
+		expiresAt,
+		status: 'unsolved',
+		submittedBy: user.role // Add role information to track who submitted
+	});
+
+	complaint.save().then(() => {
+		res.redirect('/complaint');
+	}).catch(err => {
+		res.render('form', {
+			title: 'Form',
+			error: 'Error submitting complaint: ' + err.message,
+			email: user.email,
+			user: user
 		});
+	});
 });
 // Change complaint color to green
 router.post('/change-complaint-color', function(req, res) {
