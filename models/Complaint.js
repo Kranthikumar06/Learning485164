@@ -12,6 +12,7 @@ const complaintSchema = new mongoose.Schema({
   color: { type: String, default: 'red' },
   expiresAt: Number,
   status: String,
+  submittedBy: { type: String, enum: ['admin', 'faculty', 'student'] }, // Track who submitted the complaint
   createdAt: { type: Date, default: Date.now }
 });
 
