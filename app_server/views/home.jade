@@ -20,9 +20,9 @@ block content
       if email
         a(href="/profile", title="Profile")
           if user && user.photo && user.photo !== '' && user.photo !== null
-              img(src=user.photo, alt="Profile Photo", style="width:40px;height:40px;border-radius:50%;background:#eee;", onerror="this.onerror=null;this.src='/images/profile.png';")
+            img(src=user.photo, alt="Profile Photo", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;")
           else
-            img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;")
+            img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;")
   if typeof user !== 'undefined' && user && user.name
     .welcome-user(style="margin:16px 0;font-weight:bold;color:#1976d2;") Welcome, #{user.name}!
   .home-bg-section
