@@ -38,11 +38,6 @@ router.get('/complaint', function(req, res) {
 		}
 	}
 
-	// If not logged in, redirect to sign in
-	if (!user) {
-		return res.redirect('/users/signin');
-	}
-
 	const selectedCategory = req.query.category || '';
 	const now = Date.now();
 
@@ -51,11 +46,10 @@ router.get('/complaint', function(req, res) {
 		let filteredComplaints = complaints;
 
 		// Filter complaints based on user role
-		if (user.role === 'student') {
-			// Students can't see harassment or faculty complaints
+		if (!user || user.role === 'student') {
+			// Public access and students can't see harassment complaints
 			filteredComplaints = complaints.filter(c => 
-				c.category.toLowerCase() !== 'harassment' && 
-				c.category.toLowerCase() !== 'faculty'
+				c.category.toLowerCase() !== 'harassment'
 			);
 		}
 		// Admin and faculty can see all complaints
@@ -65,17 +59,14 @@ router.get('/complaint', function(req, res) {
 			filteredComplaints = filteredComplaints.filter(c => c.category === selectedCategory);
 		}
 
-		// Get available categories based on user role
-		let categories;
-		if (user.role === 'student') {
-			// Filter out restricted categories for students
+		// Get available categories
+		let categories = [];
+		if (!user || user.role === 'student') {
+			// Public access and students don't see harassment category
 			categories = [...new Set(complaints
 				.map(c => c.category)
 				.filter(Boolean)
-				.filter(cat => 
-					cat.toLowerCase() !== 'harassment' && 
-					cat.toLowerCase() !== 'faculty'
-				))];
+				.filter(cat => cat.toLowerCase() !== 'harassment'))];
 		} else {
 			// Admin and faculty see all categories
 			categories = [...new Set(complaints.map(c => c.category).filter(Boolean))];
@@ -87,8 +78,8 @@ router.get('/complaint', function(req, res) {
 			categories, 
 			selectedCategory, 
 			now, 
-			email: user.email,
-			user: user // Pass the full user object to the view
+			email: user ? user.email : null,
+			user: user || { role: 'public' } // Pass user object or default to public role
 		});
 	});
 });
