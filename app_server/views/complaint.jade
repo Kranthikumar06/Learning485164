@@ -3,6 +3,44 @@ extends layout
 
 block head
   link(rel='stylesheet', href='/stylesheets/card.css')
+  style.
+    /* Make the filter bar fixed/sticky and keep complaint type in a single non-wrapping row */
+    .filter-bar{
+      position: -webkit-sticky;
+      position: sticky;
+      top: 90px; /* adjust if your navbar height differs */
+      z-index: 950;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(6px);
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(30,40,50,0.06);
+      margin-bottom: 20px;
+    }
+    .filter-bar .filter-group{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap; /* keep contents on single line */
+      overflow: auto; /* allow horizontal scroll if necessary */
+    }
+    .filter-bar .filter-group button{
+      white-space: nowrap;
+    }
+    /* ensure the left group (Complaint Type) doesn't collapse when space is tight */
+    .filter-bar .filter-group[data-type='category']{
+      flex: 1 1 auto;
+      min-width: 320px;
+    }
+    /* smaller screens: allow horizontal scrolling inside filter groups */
+    @media (max-width:760px){
+      .filter-bar{padding:10px; top:70px}
+      .filter-bar .filter-group{gap:8px}
+    }
 
 block content
   
@@ -25,16 +63,16 @@ block content
       if email
         a(href="/profile", title="Profile")
           if typeof user !== 'undefined' && user && user.photo && user.photo !== '' && user.photo !== null
-            img(src=user.photo, alt="Profile Photo", style="width:40px;height:40px;border-radius:50%;background:#eee;")
+            img(src=user.photo, alt="Profile Photo", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;")
           else
-            img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;")
+            img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;")
   .main-content(style='margin-top:80px;')
     // Filter bar with category + status buttons (client-side controls)
     .filter-bar
       .filter-group(data-type='category')
         span Complaint Type:
         // dynamic category buttons (render 'All' plus categories)
-        button.active(data-filter='All') All
+        button.active(data-filter='All',style="margin-top: 0px;") All
         if categories
           each cat in categories
             button(data-filter=cat)= cat
