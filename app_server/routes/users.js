@@ -85,6 +85,24 @@ router.post('/edit-profile', upload.single('photo'), async function(req, res) {
   if (!user) {
     return res.redirect('/users/signin');
   }
+
+  // First check if user exists and is verified
+  const dbUser = await User.findOne({ email: user.email });
+  if (!dbUser) {
+    return res.render('edit_profile', { 
+      title: 'Edit Profile', 
+      error: 'User not found.', 
+      user 
+    });
+  }
+  if (!dbUser.isVerified) {
+    return res.render('edit_profile', { 
+      title: 'Edit Profile', 
+      error: 'Please verify your email before updating your profile. Check your email for the verification link.', 
+      user: dbUser 
+    });
+  }
+
   const { name, location, phone, password, confirm_password } = req.body;
   let photo = '';
   if (req.file && req.file.filename) {
@@ -95,10 +113,16 @@ router.post('/edit-profile', upload.single('photo'), async function(req, res) {
     console.log('Update data:', { name, location, phone, photo, passwordProvided: !!password });
 
     // If a new password is provided, validate and hash it
-    let updateObj = { name, location, phone, ...(photo ? { photo } : {}) };
+    let updateObj = { 
+      name, 
+      location, 
+      phone,
+      role: dbUser.role, // Preserve the existing role
+      ...(photo ? { photo } : {}) 
+    };
     if (password && password.length > 0) {
       if (password !== confirm_password) {
-        return res.render('edit_profile', { title: 'Edit Profile', error: 'Passwords must match.', user, name, email: user.email, location, phone });
+        return res.render('edit_profile', { title: 'Edit Profile', error: 'Passwords must match.', user: dbUser, name, email: user.email, location, phone });
       }
       const hashed = await bcrypt.hash(password, 10);
       updateObj.password = hashed;
@@ -157,11 +181,27 @@ router.post('/set-password', async function(req, res) {
     return res.render('set_password', { title: 'Set Password', error: 'Passwords must match.', email: user.email });
   }
   try {
+    // Get the user from database to check verification status
+    const dbUser = await User.findOne({ email: user.email });
+    if (!dbUser) {
+      return res.render('set_password', { title: 'Set Password', error: 'User not found.', email: user.email });
+    }
+    if (!dbUser.isVerified) {
+      return res.render('set_password', { 
+        title: 'Set Password', 
+        error: 'Please verify your email before setting a password. Check your email for the verification link.', 
+        email: user.email 
+      });
+    }
+
     // Update MongoDB user password
     const hashed = await bcrypt.hash(password, 10);
     const updated = await User.findOneAndUpdate(
       { email: user.email },
-      { password: hashed },
+      { 
+        password: hashed,
+        role: dbUser.role // Preserve the existing role
+      },
       { new: true }
     );
     if (!updated) {
@@ -181,79 +221,130 @@ router.get('/auth/google',
 router.get('/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/users/signin' }),
   async function(req, res) {
-    const googleUser = req.user;
-    const email = googleUser.emails[0].value;
-    let dbUser = await User.findOne({ email });
-    if (!dbUser) {
-      // Create new user with isVerified: false and verificationToken
-      const verificationToken = require('crypto').randomBytes(32).toString('hex');
-      dbUser = new User({
-        name: googleUser.displayName,
-        email,
-        username: googleUser.id,
-        phone: '',
-        isVerified: false,
-        verificationToken
-      });
-      await dbUser.save();
-      // Send verification email using SendGrid
-      const sgMail = require('@sendgrid/mail');
-      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-      const verifyUrl = `${process.env.BASE_URL}/users/verify?token=${verificationToken}`;
-      const msg = {
-        to: email,
-        from: process.env.EMAIL_USER, // Must be a verified sender in SendGrid
-        subject: 'Verify your email for Secure My Campus',
-        html: `<p>Welcome to Secure My Campus!</p><p>Please verify your email by clicking the link below:</p><a href="${verifyUrl}">${verifyUrl}</a>`
-      };
-      sgMail.send(msg)
-        .then(() => {
-          console.log('Verification email sent');
-        })
-        .catch((error) => {
-          console.error('Error sending verification email:', error);
+    try {
+      const googleUser = req.user;
+      const email = googleUser.emails[0].value;
+
+      // Determine user role based on email
+      let role;
+      if (email === 'securemycampus485164@gmail.com') {
+        role = 'admin';
+      } else if (!email.endsWith('@anurag.edu.in')) {
+        return res.render('signin', { 
+          title: 'Sign In', 
+          error: 'Only @anurag.edu.in email addresses are allowed (except for admin).', 
+          email 
         });
-  return res.render('signin', { title: 'Sign In', success: 'A verification link has been sent to your email. Please verify before signing in.', email: email });
-    }
-    if (!dbUser.isVerified) {
-      console.log('BLOCKED: Google user not verified:', dbUser.email);
-      // Resend verification email if not verified
-      if (!dbUser.verificationToken) {
-        dbUser.verificationToken = require('crypto').randomBytes(32).toString('hex');
-        await dbUser.save();
+      } else {
+        const localPart = email.split('@')[0];
+        if (/^[a-zA-Z]+$/.test(localPart)) {
+          role = 'faculty';
+        } else if (/^[a-zA-Z0-9]+$/.test(localPart)) {
+          role = 'student';
+        } else {
+          return res.render('signin', { 
+            title: 'Sign In', 
+            error: 'Invalid email format. Faculty emails should contain only letters, student emails can contain letters and numbers.', 
+            email 
+          });
+        }
       }
-      // Send verification email using SendGrid
-      const sgMail = require('@sendgrid/mail');
-      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-      const verifyUrl = `${process.env.BASE_URL}/users/verify?token=${dbUser.verificationToken}`;
-      const msg = {
-        to: email,
-        from: process.env.EMAIL_USER, // Must be a verified sender in SendGrid
-        subject: 'Verify your email for Secure My Campus',
-        html: `<p>Welcome to Secure My Campus!</p><p>Please verify your email by clicking the link below:</p><a href="${verifyUrl}">${verifyUrl}</a>`
-      };
-      sgMail.send(msg)
-        .then(() => {
-          console.log('Verification email sent');
-        })
-        .catch((error) => {
-          console.error('Error sending verification email:', error);
+
+      let dbUser = await User.findOne({ email });
+      
+      if (!dbUser) {
+        const verificationToken = require('crypto').randomBytes(32).toString('hex');
+        dbUser = new User({
+          name: googleUser.displayName,
+          email,
+          username: googleUser.id,
+          phone: '',
+          role: role,
+          isVerified: false,
+          verificationToken
         });
-  return res.render('signin', { title: 'Sign In', success: 'A verification link has been sent to your email. Please verify before signing in.', email: email });
+        await dbUser.save();
+
+        // Send verification email using SendGrid
+        const sgMail = require('@sendgrid/mail');
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        const verifyUrl = `${process.env.BASE_URL}/users/verify?token=${verificationToken}`;
+        const msg = {
+          to: email,
+          from: process.env.EMAIL_USER,
+          subject: 'Verify your email for Secure My Campus',
+          html: `<p>Welcome to Secure My Campus!</p><p>Please verify your email by clicking the link below:</p><a href="${verifyUrl}">${verifyUrl}</a>`
+        };
+        
+        try {
+          await sgMail.send(msg);
+          console.log('Verification email sent');
+        } catch (error) {
+          console.error('Error sending verification email:', error);
+        }
+        
+        return res.render('signin', { 
+          title: 'Sign In', 
+          success: 'A verification link has been sent to your email. Please verify before signing in.', 
+          email: email 
+        });
+      }
+
+      if (!dbUser.isVerified) {
+        console.log('BLOCKED: Google user not verified:', dbUser.email);
+        
+        if (!dbUser.verificationToken) {
+          dbUser.verificationToken = require('crypto').randomBytes(32).toString('hex');
+          await dbUser.save();
+        }
+
+        const sgMail = require('@sendgrid/mail');
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        const verifyUrl = `${process.env.BASE_URL}/users/verify?token=${dbUser.verificationToken}`;
+        const msg = {
+          to: email,
+          from: process.env.EMAIL_USER,
+          subject: 'Verify your email for Secure My Campus',
+          html: `<p>Welcome to Secure My Campus!</p><p>Please verify your email by clicking the link below:</p><a href="${verifyUrl}">${verifyUrl}</a>`
+        };
+        
+        try {
+          await sgMail.send(msg);
+          console.log('Verification email sent');
+        } catch (error) {
+          console.error('Error sending verification email:', error);
+        }
+
+        return res.render('signin', { 
+          title: 'Sign In', 
+          success: 'A verification link has been sent to your email. Please verify before signing in.', 
+          email: email 
+        });
+      }
+
+      // Only verified users reach here
+      console.log('LOGIN: Google user verified:', dbUser.email);
+      const token = jwt.sign({
+        email: dbUser.email,
+        name: dbUser.name,
+        username: dbUser.username,
+        phone: dbUser.phone,
+        role: dbUser.role
+      }, JWT_SECRET, { expiresIn: '2h' });
+      
+      res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: false, path: '/' });
+      res.redirect('/');
+    } catch (error) {
+      console.error('Google auth error:', error);
+      res.render('signin', { 
+        title: 'Sign In', 
+        error: 'Authentication failed: ' + error.message, 
+        email: '' 
+      });
     }
-    // Only verified users reach here
-    console.log('LOGIN: Google user verified:', dbUser.email);
-    const jwt = require('jsonwebtoken');
-    const token = jwt.sign({
-      email: dbUser.email,
-      name: dbUser.name,
-      username: dbUser.username,
-      phone: dbUser.phone
-    }, JWT_SECRET, { expiresIn: '2h' });
-    res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: false, path: '/' });
-    res.redirect('/');
   }
 );
+
 router.get('/test-users-json-write', function(req, res) {
   const filePath = path.join(__dirname, '../../data/users.json');
   let original = '';
@@ -305,6 +396,32 @@ router.post('/signup', async function(req, res) {
   if (phone && !/^\d{10}$/.test(phone)) {
     return res.render('signup', { title: 'Sign Up', error: 'Phone number must be 10 digits.', email });
   }
+
+  // Determine user role based on email
+  let role;
+  if (email === 'securemycampus485164@gmail.com') {
+    role = 'admin';
+  } else if (!email.endsWith('@anurag.edu.in')) {
+    return res.render('signup', { 
+      title: 'Sign Up', 
+      error: 'Only @anurag.edu.in email addresses are allowed (except for admin).', 
+      email 
+    });
+  } else {
+    const localPart = email.split('@')[0];
+    if (/^[a-zA-Z]+$/.test(localPart)) {
+      role = 'faculty';
+    } else if (/^[a-zA-Z0-9]+$/.test(localPart)) {
+      role = 'student';
+    } else {
+      return res.render('signup', { 
+        title: 'Sign Up', 
+        error: 'Invalid email format. Faculty emails should contain only letters, student emails can contain letters and numbers.', 
+        email 
+      });
+    }
+  }
+
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -319,6 +436,7 @@ router.post('/signup', async function(req, res) {
       phone,
       email,
       password: hashed,
+      role,
       isVerified: false,
       verificationToken
     });
@@ -370,8 +488,23 @@ router.post('/signin', async function(req, res) {
     if (!(await bcrypt.compare(password, user.password))) {
       return res.render('signin', { title: 'Sign In', error: 'Invalid entry. Email or password is incorrect.', email: '' });
     }
+    // Check if the user is verified
+    if (!user.isVerified) {
+      return res.render('signin', { 
+        title: 'Sign In', 
+        error: 'Please verify your email before signing in. Check your email for the verification link.', 
+        email 
+      });
+    }
+
     // Issue JWT token
-    const token = jwt.sign({ email: user.email, name: user.name, username: user.username, phone: user.phone }, JWT_SECRET, { expiresIn: '2h' });
+    const token = jwt.sign({ 
+      email: user.email, 
+      name: user.name, 
+      username: user.username, 
+      phone: user.phone,
+      role: user.role 
+    }, JWT_SECRET, { expiresIn: '2h' });
     res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: false });
     res.redirect('/');
   } catch (err) {
