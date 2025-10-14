@@ -219,7 +219,7 @@ router.get('/auth/google',
 );
 
 router.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/users/signin' }),
+  passport.authenticate('google', { failureRedirect: '/users/signin?error=' + encodeURIComponent('Only @anurag.edu.in email addresses are allowed (except for admin).'), failWithError: true }),
   async function(req, res) {
     try {
       const googleUser = req.user;
@@ -385,7 +385,8 @@ router.get('/signin', function(req, res) {
       email = '';
     }
   }
-  res.render('signin', { title: 'Sign In', email });
+  const error = req.query.error || '';
+  res.render('signin', { title: 'Sign In', email, error });
 });
 // Signup route
 router.post('/signup', async function(req, res) {
