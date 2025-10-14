@@ -31,16 +31,35 @@ passport.use(new GoogleStrategy({
   const User = require('./models/User');
   const email = profile.emails && profile.emails[0] ? profile.emails[0].value : '';
   if (!email) return done(null, profile);
-  User.findOne({ email }).then(user => {
+  User.findOne({ email }).then(async user => {
     if (!user) {
+      // Determine user role based on email
+      let role;
+      if (email === 'securemycampus485164@gmail.com') {
+        role = 'admin';
+      } else if (!email.endsWith('@anurag.edu.in')) {
+        return done(null, false, { message: 'Only @anurag.edu.in email addresses are allowed (except for admin).' });
+      } else {
+        const localPart = email.split('@')[0];
+        if (/^[a-zA-Z]+$/.test(localPart)) {
+          role = 'faculty';
+        } else if (/^[a-zA-Z0-9]+$/.test(localPart)) {
+          role = 'student';
+        } else {
+          return done(null, false, { message: 'Invalid email format. Faculty emails should contain only letters, student emails can contain letters and numbers.' });
+        }
+      }
+
       const newUser = new User({
         name: profile.displayName,
         email: email,
         username: profile.id,
         phone: '',
-        password: '' // No password for Google users
+        password: '', // No password for Google users
+        role: role,
+        isVerified: false
       });
-      newUser.save().then(() => done(null, profile));
+      await newUser.save().then(() => done(null, profile));
     } else {
       done(null, profile);
     }
