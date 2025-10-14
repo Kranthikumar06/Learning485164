@@ -289,6 +289,7 @@ body {
       font-size: 16px;
       color: #333;
       letter-spacing: 1px;
+      font-weight: 700; /* make "My Campus" bold across the site */
     }
 
     .navbar .nav-links {
@@ -590,7 +591,7 @@ body {
             width: auto;
         }
         button {
-            margin-top: 20px;
+            margin-top: 0px;
             width: 100%;
             padding: 10px;
             background: #2980b9;
