@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
   password: String,
   location: String,
   photo: String,
+  role: { type: String, enum: ['admin', 'faculty', 'student'], required: true },
   isVerified: { type: Boolean, default: false },
   verificationToken: { type: String }
 });
