@@ -22,3 +22,4 @@ document.addEventListener('DOMContentLoaded', function() {
   setInterval(updateTimers, 1000);
   updateTimers();
 });
+
