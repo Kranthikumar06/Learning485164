@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
@@ -7,7 +8,10 @@ const userSchema = new mongoose.Schema({
   phone: String,
   password: String,
   location: String,
-  photo: String,
+  photo: {
+    data: Buffer,
+    contentType: String
+  },
   role: { type: String, enum: ['admin', 'faculty', 'student'], required: true },
   isVerified: { type: Boolean, default: false },
   verificationToken: { type: String }
