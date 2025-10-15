@@ -101,6 +101,15 @@
   margin-left: 10px !important;
 }
 
+.profile-avatar {
+  width: 120px !important;
+  height: 120px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 2px solid #e6e6e6 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
 /* Edit profile: override container layout to match requested design */
 .profile-container {
   border-radius: 18px !important;
