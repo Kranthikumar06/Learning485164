@@ -28,13 +28,17 @@ router.post('/delete-complaint', function(req, res) {
 // Complaint page
 const fs = require('fs');
 const path = require('path');
-router.get('/complaint', function(req, res) {
+router.get('/complaint', async function(req, res) {
 	let user = null;
+	let dbUser = null;
 	if (req.cookies && req.cookies.token) {
 		try {
 			user = jwt.verify(req.cookies.token, JWT_SECRET);
+			const User = require('../../models/User');
+			dbUser = await User.findOne({ email: user.email });
 		} catch (e) {
 			user = null;
+			dbUser = null;
 		}
 	}
 
@@ -79,7 +83,7 @@ router.get('/complaint', function(req, res) {
 			selectedCategory, 
 			now, 
 			email: user ? user.email : null,
-			user: user || { role: 'public' } // Pass user object or default to public role
+			user: dbUser || user || { role: 'public' } // Use DB user if available, fallback to JWT user
 		});
 	});
 });
@@ -97,13 +101,35 @@ router.get('/form', function(req, res) {
 						if (!user) {
 							return res.render('signin', { title: 'Sign In', error: 'Please sign in to access the form.', email: '' });
 						}
-					res.render('form', { title: 'Form', email: user.email });
+
+						const User = require('../../models/User');
+						User.findOne({ email: user.email }).then(dbUser => {
+							if (!dbUser) {
+								return res.render('form', { 
+									title: 'Form', 
+									email: user.email,
+									user: user
+								});
+							}
+							res.render('form', { 
+								title: 'Form', 
+								email: dbUser.email,
+								user: dbUser
+							});
+						}).catch(err => {
+							console.error('Error fetching user for form:', err);
+							res.render('form', { 
+								title: 'Form', 
+								email: user.email,
+								user: user
+							});
+						});
 });
 // Handle form submission and store data in a file
 const { saveComplaint } = require('../models/complaint');
 const multer = require('multer');
 const upload = multer({
-	dest: 'public/images/uploads/',
+	storage: multer.memoryStorage(),
 	limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
 	fileFilter: (req, file, cb) => {
 		if (file.mimetype.startsWith('image/')) {
@@ -130,22 +156,22 @@ router.post('/submit-incident', upload.single('photo'), function(req, res) {
 
 	const { name, phone, date, email, category, location, description } = req.body;
 
-	// Check if student is trying to submit restricted categories
-	if (user.role === 'student' && 
-		(category.toLowerCase() === 'harassment' || category.toLowerCase() === 'faculty')) {
+	// Check if student is trying to submit faculty complaints
+	if (user.role === 'student' && category.toLowerCase() === 'faculty') {
 		return res.render('form', {
 			title: 'Form',
-			error: 'Students are not allowed to submit complaints in this category.',
+			error: 'Students are not allowed to submit complaints about faculty.',
 			email: user.email,
 			user: user
 		});
 	}
 
-	let photo = '';
-	if (req.file && req.file.filename) {
-		photo = '/images/uploads/' + req.file.filename;
-	} else if (req.body.photo) {
-		photo = req.body.photo;
+	let photo = {};
+	if (req.file) {
+		photo = {
+			data: req.file.buffer,
+			contentType: req.file.mimetype
+		};
 	}
 
 	const now = Date.now();
@@ -190,19 +216,27 @@ router.post('/change-complaint-color', function(req, res) {
 			}
 		});
 });
-router.get('/help', function(req, res) {
+router.get('/help', async function(req, res) {
 				let user = null;
+				let dbUser = null;
 				if (req.cookies && req.cookies.token) {
 					try {
 						user = jwt.verify(req.cookies.token, JWT_SECRET);
+						const User = require('../../models/User');
+						dbUser = await User.findOne({ email: user.email });
 					} catch (e) {
 						user = null;
+						dbUser = null;
 					}
 				}
-					if (!user) {
-						return res.render('signin', { title: 'Sign In', error: 'Please sign in to access the help center.', email: '' });
-					}
-				res.render('help', { title: 'Help Center', email: user.email });
+				if (!user) {
+					return res.render('signin', { title: 'Sign In', error: 'Please sign in to access the help center.', email: '' });
+				}
+				res.render('help', { 
+					title: 'Help Center', 
+					email: user.email,
+					user: dbUser || user
+				});
 });
 // Chatbot JS for help page
 function appendMessage(sender, text, id) {
@@ -297,5 +331,36 @@ router.get('/profile', function(req, res) {
 // Sign In page
 // ...removed sign in/up routes from pages.js...
 
+
+// Serve complaint images
+router.get('/complaint-image/:id', async (req, res) => {
+  try {
+    const complaint = await Complaint.findById(req.params.id);
+    if (complaint && complaint.photo && complaint.photo.data) {
+      res.set('Content-Type', complaint.photo.contentType);
+      res.send(complaint.photo.data);
+    } else {
+      res.status(404).send('Image not found');
+    }
+  } catch (err) {
+    res.status(500).send('Error retrieving image');
+  }
+});
+
+// Serve user profile photos
+router.get('/profile-image/:id', async (req, res) => {
+  try {
+    const User = require('../../models/User');
+    const user = await User.findById(req.params.id);
+    if (user && user.photo && user.photo.data) {
+      res.set('Content-Type', user.photo.contentType);
+      res.send(user.photo.data);
+    } else {
+      res.status(404).send('Image not found');
+    }
+  } catch (err) {
+    res.status(500).send('Error retrieving image');
+  }
+});
 
 module.exports = router;
