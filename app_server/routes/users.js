@@ -36,8 +36,8 @@ router.get('/verify', async function(req, res) {
 });
 
 const upload = multer({
-  dest: path.join(__dirname, '../../public/images/uploads/'),
-  limits: { fileSize: 5 * 1024 * 1024 },
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
       cb(null, true);
@@ -104,22 +104,31 @@ router.post('/edit-profile', upload.single('photo'), async function(req, res) {
   }
 
   const { name, location, phone, password, confirm_password } = req.body;
-  let photo = '';
-  if (req.file && req.file.filename) {
-    photo = '/images/uploads/' + req.file.filename;
-  }
   console.log('Attempting profile update for:', user.email);
   try {
-    console.log('Update data:', { name, location, phone, photo, passwordProvided: !!password });
-
-    // If a new password is provided, validate and hash it
+    // Prepare update object
     let updateObj = { 
       name, 
       location, 
       phone,
-      role: dbUser.role, // Preserve the existing role
-      ...(photo ? { photo } : {}) 
+      role: dbUser.role // Preserve the existing role
     };
+
+    // If a new photo is uploaded, store it in MongoDB
+    if (req.file) {
+      updateObj.photo = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype
+      };
+    }
+
+    console.log('Update data:', { 
+      name, 
+      location, 
+      phone, 
+      photoUploaded: !!req.file, 
+      passwordProvided: !!password 
+    });
     if (password && password.length > 0) {
       if (password !== confirm_password) {
         return res.render('edit_profile', { title: 'Edit Profile', error: 'Passwords must match.', user: dbUser, name, email: user.email, location, phone });
