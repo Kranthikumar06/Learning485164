@@ -35,8 +35,8 @@ block content
           button(type="button", class="back", onclick="window.location.href='/profile'") Cancel
 
     .profile-image-section
-      if user && user.photo
-        img.profile-avatar(src=user.photo, alt="Profile Photo")
+      if user && user._id && user.photo && user.photo.data
+        img.profile-avatar(src="/profile-image/" + user._id, alt="Profile Photo")
       else
         img.profile-avatar(src="/images/profile.png", alt="Profile Photo")
 
