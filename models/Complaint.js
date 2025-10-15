@@ -8,7 +8,10 @@ const complaintSchema = new mongoose.Schema({
   category: String,
   location: String,
   description: String,
-  photo: String,
+  photo: {
+    data: Buffer,
+    contentType: String
+  },
   color: { type: String, default: 'red' },
   expiresAt: Number,
   status: String,
@@ -19,3 +22,4 @@ const complaintSchema = new mongoose.Schema({
 const Complaint = mongoose.model('Complaint', complaintSchema);
 
 module.exports = Complaint;
+
