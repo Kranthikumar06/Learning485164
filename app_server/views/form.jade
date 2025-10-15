@@ -24,14 +24,16 @@ html(lang="en")
       if email
         .profile-navbar-right(style="position:absolute; right:20px; top:50%; transform:translateY(-50%);")
           a(href="/profile")
-            img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:-3px;margin-right:8px;")
+          if user && user._id && user.photo && user.photo.data
+            img(src='/profile-image/' + user._id, alt="Profile Photo", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:-3px;margin-right:8px;object-fit:cover;")
+          else
+            img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:-3px;margin-right:8px;object-fit:cover;")
       
     // Content
     .content
       .profile-top-right
 
       .form-container
-        h2 Complaint Box
         form(action="/submit-incident", method="post", enctype="multipart/form-data")
           label(for="name") Name
           input(type="text", id="name", name="name", required=true)
@@ -60,4 +62,3 @@ html(lang="en")
         a(href="#") Privacy Policy
         | 
         a(href="#") Help Center
-
