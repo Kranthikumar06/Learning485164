@@ -251,6 +251,7 @@ body {
       top: 0;
       left: 0;
       z-index: 1000;
+      font-family: 'Poppins', sans-serif;
     }
       .profile-top-right {
         position: absolute;
@@ -284,12 +285,14 @@ body {
       font-size: 22px;
       font-weight: bold;
       color: #007bff;
+      font-family: 'Poppins', sans-serif;
     }
     .navbar .logo-container div span:last-child {
       font-size: 16px;
       color: #333;
       letter-spacing: 1px;
       font-weight: 700; /* make "My Campus" bold across the site */
+      font-family: 'Poppins', sans-serif;
     }
 
     .navbar .nav-links {
@@ -306,6 +309,7 @@ body {
       transition: color 0.3s, box-shadow 0.4s, background 0.4s;
       position: relative;
       background: none;
+      font-family: 'Poppins', sans-serif;
     }
     .navbar .nav-links a:hover {
       color: #fff;
@@ -894,3 +898,4 @@ body {
   background: #0077b5;
   color: #fff;
 }
+
