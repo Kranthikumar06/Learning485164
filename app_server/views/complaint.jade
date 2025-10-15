@@ -62,10 +62,10 @@ block content
     .profile-top-right
       if email
         a(href="/profile", title="Profile")
-          if typeof user !== 'undefined' && user && user.photo && user.photo !== '' && user.photo !== null
-            img(src=user.photo, alt="Profile Photo", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;")
+          if typeof user !== 'undefined' && user && user.photo && user.photo.data
+            img(src='/profile-image/' + user._id, alt="Profile Photo", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;object-fit:cover;")
           else
-            img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;")
+            img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;object-fit:cover;")
   .main-content(style='margin-top:80px;')
     // Filter bar with category + status buttons (client-side controls)
     .filter-bar
@@ -89,8 +89,8 @@ block content
             .card(data-category=complaint.category, data-status=status)
               .card-inner
                 .card-front
-                  if complaint.photo
-                    img(src=complaint.photo, alt='Photo')
+                  if complaint.photo && complaint.photo.data
+                    img(src='/complaint-image/' + complaint._id, alt='Photo')
                   .info
                     h3= complaint.category
                     p #{(complaint.description && complaint.description.length>140) ? complaint.description.substring(0,137) + '...' : complaint.description}
@@ -133,7 +133,7 @@ block content
 
           function cardTemplate(item){
             var fallback = '/images/Campus.png';
-            var img = item.photo || item.img || ''; // support either property name
+            var img = (item.photo && item.photo.data) ? '/complaint-image/' + item._id : ''; // use new image route
             var title = item.category || 'Complaint';
             var desc = item.description || '';
             // compute time left until deletion (use server-provided 'now' when available)
