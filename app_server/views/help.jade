@@ -1,3 +1,4 @@
+
 extends layout
 
 block head
@@ -22,7 +23,10 @@ block content
     .profile-top-right
       if email
         a(href="/profile", title="Profile")
-          img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;")
+          if user && user._id && user.photo && user.photo.data
+            img(src="/profile-image/" + user._id, alt="Profile Photo", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;object-fit:cover;")
+          else
+            img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;object-fit:cover;")
 
   // Chat Section compatible with helpcenter.css / helpcenter.js
   .content
