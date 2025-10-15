@@ -31,10 +31,10 @@ html(lang="en")
           a(href="/users/edit-profile", class="edit") Edit
           button.logout(onclick="logoutUser()") Logout
       .profile-image-section
-        if user && user.photo
-          img(src=user.photo, alt="Profile Photo", style="width:120px;height:120px;border-radius:50%;")
+        if user && user._id && user.photo && user.photo.data
+          img(src="/profile-image/" + user._id, alt="Profile Photo", style="width:120px;height:120px;border-radius:50%;object-fit:cover;")
         else
-          img(src="/images/profile.png", alt="Campus Logo", style="width:120px;height:120px;border-radius:50%;")
+          img(src="/images/profile.png", alt="Default Profile", style="width:120px;height:120px;border-radius:50%;object-fit:cover;")
     footer
       p © 2025 Secure My Campus | 
         a(href="#") Privacy Policy
