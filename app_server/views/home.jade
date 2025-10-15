@@ -19,22 +19,307 @@ block content
     .profile-top-right
       if email
         a(href="/profile", title="Profile")
-          if user && user.photo && user.photo !== '' && user.photo !== null
-            img(src=user.photo, alt="Profile Photo", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;")
+          if user && user.photo && user.photo.data
+            img(src='/profile-image/' + user._id, alt="Profile Photo", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;object-fit:cover;")
           else
-            img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;")
+            img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;object-fit:cover;")
   if typeof user !== 'undefined' && user && user.name
     .welcome-user(style="margin:16px 0;font-weight:bold;color:#1976d2;") Welcome, #{user.name}!
-  .home-bg-section
-    .home-bg-overlay
-      p.home-welcome Welcome to Secure My Campus!
-      p.home-desc
-        | Secure My Campus is a platform designed to help students, staff, and visitors easily submit complaints, access forms, manage profiles, and sign in securely. Our goal is to make your campus experience safer, more efficient, and more connected. If you have any issues or suggestions, please reach out to us!
-  .home-contact
-    h2 Contact Us
-    p Phone: +91-9876543210
-    p Email: contact@securemycampus.com
-footer
-  p
-    | © 2025 Secure My Campus |
-    a(href="#") Privacy Policy
+  // Hero Section
+  section.hero(style="padding-right: 200px; padding-left: 200px;")
+    .hero-content
+      h1 Welcome to 
+        span Secure My Campus
+      p Empowering students and faculty to report, resolve, and stay connected. Whether it's lost items, harassment, or food issues — we're here to ensure your campus stays safe and supportive.
+      if email
+        a(href='/form') Report an Issue
+      else
+        a(href='/users/signin') Report an Issue
+    .hero-img
+      img(src='https://i.pinimg.com/1200x/e2/1c/c1/e21cc1831124f2c7cc9d6383920d0aa1.jpg', alt='Campus Image')
+
+  // Overview
+  section.overview(style="padding-left: 300px; padding-right: 300px;")
+    h2 About Secure My Campus
+    p Secure My Campus is a comprehensive platform designed to enhance safety, transparency, and communication on college campuses. It enables students and staff to report issues—including maintenance, safety concerns, and harassment—and monitor their resolution in real time. The platform also features a smart Lost & Found system and secure administrative tools for efficient management. By streamlining communication and accountability, it fosters a responsive and well-organized campus environment. Accessible, reliable, and user-friendly, Secure My Campus ensures a safer and more connected campus experience.
+
+  // Stats Section
+  section.stats(style="padding-right: 130px; padding-left: 130px; padding-top: 90px; padding-bottom: 90px;")
+    .stats-container
+      .stat-box
+        h3 10,000 +
+        p Students actively using Secure My Campus to report and resolve issues.
+      .stat-box
+        h3 500 +
+        p Complaints successfully resolved by campus authorities.
+      .stat-box
+        h3 95 %
+        p Overall success rate in resolving student concerns and feedback.
+      .stat-box
+        h3 1200 +
+        p Positive responses from students appreciating faster complaint actions.
+
+  // Features
+  section.features(style="padding-left: 400px; padding-right: 400px; padding-top: 50px; padding-bottom: 50px;")
+    h2 Our Key Features
+    .feature-grid
+      .feature-card
+        h3 Lost & Found Portal
+        p Quickly post or search for lost and found items in your campus community.
+      .feature-card
+        h3 Complaint Management
+        p File complaints easily and track their progress until they're resolved.
+      .feature-card
+        h3 Faculty Dashboard
+        p Authorized faculty can monitor, verify, and resolve student issues efficiently.
+      .feature-card
+        h3 Real-Time Updates
+        p Stay notified with live updates on complaint resolution and new announcements.
+
+  // Contact
+  section.contact(style="padding-right: 400px; padding-left: 400px;")
+    h2 Need Help?
+    p Have a question or suggestion? Reach out to our support team — we're always happy to help you improve your campus experience.
+    a(href='#') Contact Us
+
+  // Footer
+  footer(style="padding-right: 500px; padding-left: 500px;")
+    p © 2025 Secure My Campus | 
+      a(href='#') Privacy Policy
+      |  | 
+      a(href='#') Help Center
+
+append head
+  link(href='https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap', rel='stylesheet')
+  style.
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #e3f2fd, #e1bee7);
+      color: #222;
+      overflow-x: hidden;
+    }
+
+    /* Hero Section */
+    .hero {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 150px 80px 100px;
+      background: linear-gradient(135deg, #f3e5f5 0%, #e3f2fd 100%);
+    }
+
+    .hero-content {
+      max-width: 500px;
+      animation: fadeInLeft 1.5s ease;
+    }
+
+    .hero-content h1 {
+      font-size: 45px;
+      color: #222;
+      margin-bottom: 20px;
+    }
+
+    .hero-content span {
+      color: #007bff;
+    }
+
+    .hero-content p {
+      margin-bottom: 30px;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .hero-content a {
+      text-decoration: none;
+      background: linear-gradient(45deg, #007bff, #00c6ff);
+      color: #fff;
+      padding: 12px 25px;
+      border-radius: 25px;
+      transition: 0.4s;
+      font-weight: bold;
+    }
+
+    .hero-content a:hover {
+      transform: scale(1.05);
+      background: linear-gradient(45deg, #00c6ff, #007bff);
+    }
+
+    .hero-img img {
+      width: 450px;
+      border-radius: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    @keyframes fadeInLeft {
+      from { opacity: 0; transform: translateX(-50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Overview Section */
+    .overview {
+      text-align: center;
+      padding: 100px 60px;
+      background: #fff;
+    }
+
+    .overview h2 {
+      font-size: 32px;
+      color: #007bff;
+      margin-bottom: 20px;
+    }
+
+    .overview p {
+      color: #555;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    /* Stats Section */
+    .stats {
+      background: linear-gradient(135deg, #e1bee7, #90caf9);
+      padding: 100px 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 50px;
+      width: 100%;
+      max-width: 1100px;
+      text-align: center;
+      color: #222;
+      animation: fadeIn 1.5s ease;
+    }
+
+    .stat-box h3 {
+      font-size: 38px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #7b1fa2, #007bff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      transition: transform 0.3s ease;
+    }
+
+    .stat-box p {
+      font-size: 15px;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .stat-box:hover h3 {
+      transform: scale(1.1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Features Section */
+    .features {
+      background: #fff;
+      padding: 100px 60px;
+      text-align: center;
+    }
+
+    .features h2 {
+      color: #007bff;
+      margin-bottom: 40px;
+      font-size: 30px;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+    }
+
+    .feature-card {
+      background: #f9f9ff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: 0.4s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .feature-card h3 {
+      color: #007bff;
+      margin-bottom: 10px;
+    }
+
+    /* Contact */
+    .contact {
+      background: linear-gradient(135deg, #4a90e2, #7b1fa2);
+      color: #fff;
+      text-align: center;
+      padding: 100px 40px;
+    }
+
+    .contact h2 {
+      font-size: 30px;
+      margin-bottom: 20px;
+    }
+
+    .contact p {
+      max-width: 600px;
+      margin: 0 auto 30px;
+      line-height: 1.6;
+    }
+
+    .contact a {
+      text-decoration: none;
+      color: #4a90e2;
+      background: #fff;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .contact a:hover {
+      background: #007bff;
+      color: #fff;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      background: #fff;
+      padding: 20px;
+      color: #555;
+      font-size: 14px;
+    }
+
+    footer a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
