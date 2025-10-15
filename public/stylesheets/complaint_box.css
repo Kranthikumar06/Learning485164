@@ -15,16 +15,29 @@
 
  /* Navbar */
  .navbar {
-     width: 100%;
-     background: #fff;
-     padding: 12px 40px;
-     display: flex;
-     justify-content: space-between;
      align-items: center;
-     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+     background-attachment: scroll;
+     background-clip: border-box;
+     background-color: rgb(255, 255, 255);
+     background-image: none;
+     background-origin: padding-box;
+     background-position: 0% 0%;
+     background-repeat: repeat;
+     background-size: auto;
+     box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 10px 0px;
+     box-sizing: border-box;
+     column-gap: 40px;
+     display: flex;
+     font-family: Poppins, sans-serif;
+     height: 94px;
+     justify-content: flex-start;
+     left: 0px;
+     margin: 0px;
+     padding: 12px 40px;
      position: fixed;
-     top: 0;
-     left: 0;
+     row-gap: 40px;
+     top: 0px;
+     width: 100%;
      z-index: 1000;
  }
 
