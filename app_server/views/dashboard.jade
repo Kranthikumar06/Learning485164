@@ -1,0 +1,32 @@
+extends layout
+
+block content
+  .navbar
+    .logo-container
+      img(src="/images/Campus.png", alt="Secure My Campus Logo")
+      div
+        span(style="font-size:22px;font-weight:bold;color:#007bff;") Secure
+        span(style="font-size:16px;color:#333;letter-spacing:1px;") My Campus
+    .nav-links
+      a(href="/") Home
+      a(href="/complaint") Complaint Box
+      if email
+        a(href="/dashboard") Dashboard
+        a(href="/help") Help Center
+      else
+        a(href="/users/signup") Sign Up
+        a(href="/users/signin") Sign In
+    .profile-top-right
+      if email
+        a(href="/profile", title="Profile")
+          if user && user.photo && user.photo.data
+            img(src='/profile-image/' + user._id, alt="Profile Photo", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;object-fit:cover;")
+          else
+            img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;object-fit:cover;")
+ 
+  footer(style='margin-top:60px; text-align:center; padding:20px; background:#f8f9fa; border-top:1px solid #e0e0e0;')
+    p(style='margin:0; color:#666;')
+      | © 2025 Secure My Campus |
+      a(href="#", style='color:#007bff; text-decoration:none;') Privacy Policy
+      |  |
+      a(href="#", style='color:#007bff; text-decoration:none;') Help Center
