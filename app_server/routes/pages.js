@@ -277,6 +277,47 @@ function sendToPython() {
 		if (botMsg) botMsg.innerText = 'Error: ' + error;
 	});
 }
+// Dashboard page
+router.get('/dashboard', async function(req, res) {
+	let user = null;
+	let dbUser = null;
+	if (req.cookies && req.cookies.token) {
+		try {
+			user = jwt.verify(req.cookies.token, JWT_SECRET);
+			const User = require('../../models/User');
+			dbUser = await User.findOne({ email: user.email });
+		} catch (e) {
+			user = null;
+			dbUser = null;
+		}
+	}
+	if (!user) {
+		return res.render('signin', { title: 'Sign In', error: 'Please sign in to access the dashboard.', email: '' });
+	}
+
+	// Get complaints based on user role
+	const now = Date.now();
+	let complaints = await Complaint.find({ 
+		$or: [ 
+			{ expiresAt: { $gt: now } }, 
+			{ expiresAt: { $exists: false } } 
+		] 
+	});
+
+	// Filter complaints based on user role
+	if (user.role === 'student') {
+		complaints = complaints.filter(c => c.category.toLowerCase() !== 'harassment');
+	}
+
+	res.render('dashboard', { 
+		title: 'Dashboard', 
+		email: user.email,
+		user: dbUser || user,
+		complaints: complaints,
+		now: now
+	});
+});
+
 // Profile page
 router.get('/profile', function(req, res) {
 			let user = null;
