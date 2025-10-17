@@ -4,6 +4,30 @@ extends layout
 block head
   link(rel='stylesheet', href='/stylesheets/card.css')
   style.
+    /* Report Issue Button - positioned bottom right of navbar */
+    .report-issue-container {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      z-index: 999;
+    }
+    .report-issue-btn {
+      background: #d10606ff;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+    .report-issue-btn:hover {
+      background: #0056b3;
+      box-shadow: 0 6px 16px rgba(0,123,255,0.4);
+      transform: translateY(-2px);
+    }
     /* Make the filter bar fixed/sticky and keep complaint type in a single non-wrapping row */
     .filter-bar{
       position: -webkit-sticky;
@@ -54,7 +78,7 @@ block content
       a(href="/") Home
       a(href="/complaint") Complaint Box
       if email
-        a(href="/form") Form Page
+        a(href="/dashboard") Dashboard
         a(href="/help") Help Center
       else
         a(href="/users/signup") Sign Up
@@ -66,6 +90,11 @@ block content
             img(src='/profile-image/' + user._id, alt="Profile Photo", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;object-fit:cover;")
           else
             img(src="/images/profile.png", alt="Profile", style="width:40px;height:40px;border-radius:50%;background:#eee;margin-top:12px;margin-right:8px;object-fit:cover;")
+  
+  // Report Issue Button - positioned bottom right below navbar
+  .report-issue-container
+    a.report-issue-btn(href="/form") Report an Issue
+  
   .main-content(style='margin-top:80px;')
     // Filter bar with category + status buttons (client-side controls)
     .filter-bar
@@ -256,3 +285,4 @@ block content
       |  |
       a(href="#") Help Center
     script(src="/javascripts/complaint_timer.js")
+
