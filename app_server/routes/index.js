@@ -3,7 +3,7 @@ var express = require('express');
 var router = express.Router();
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', async function(req, res, next) {
   let user = null;
   if (req.cookies && req.cookies.token) {
     try {
@@ -14,6 +14,22 @@ router.get('/', function(req, res, next) {
       user = null;
     }
   }
+
+  // Fetch latest complaint
+  const Complaint = require('../../models/Complaint');
+  let latestComplaint = null;
+  try {
+    const now = Date.now();
+    latestComplaint = await Complaint.findOne({ 
+      $or: [ 
+        { expiresAt: { $gt: now } }, 
+        { expiresAt: { $exists: false } } 
+      ] 
+    }).sort({ _id: -1 }).limit(1);
+  } catch (err) {
+    console.error('Error fetching latest complaint:', err);
+  }
+
   if (user && user.email) {
     const User = require('../../models/User');
     User.findOne({ email: user.email }).then(dbUser => {
@@ -24,7 +40,8 @@ router.get('/', function(req, res, next) {
         name: dbUser ? dbUser.name : user.name,
         username: dbUser ? dbUser.username : user.username,
         phone: dbUser ? dbUser.phone : user.phone,
-        user: dbUser || user
+        user: dbUser || user,
+        latestComplaint: latestComplaint
       });
     }).catch(err => {
       console.log('Home page user object (error):', user);
@@ -34,7 +51,8 @@ router.get('/', function(req, res, next) {
         name: user.name,
         username: user.username,
         phone: user.phone,
-        user: user
+        user: user,
+        latestComplaint: latestComplaint
       });
     });
   } else {
@@ -44,7 +62,8 @@ router.get('/', function(req, res, next) {
       name: '',
       username: '',
       phone: '',
-      user: null
+      user: null,
+      latestComplaint: latestComplaint
     });
   }
 });
