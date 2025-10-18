@@ -4,24 +4,41 @@
 // (Move this below 'var router = express.Router();')
 var express = require('express');
 const Complaint = require('../../models/Complaint');
+const Dashboard = require('../../models/Dashboard');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = 'securemycampusjwt';
 var router = express.Router();
 
 
-// Delete complaint by index
+// Delete complaint by id (fallback to index for backward compat)
 router.post('/delete-complaint', function(req, res) {
-	const { index } = req.body;
+	const { id, index } = req.body;
+	const doDeleteById = (toDeleteId) => {
+		Complaint.findByIdAndDelete(toDeleteId).then(async () => {
+			try {
+				await Dashboard.deleteOne({ complaintId: toDeleteId });
+			} catch (e) {
+				console.error('Failed to delete dashboard item for complaint:', e.message);
+			}
+			res.redirect('/complaint');
+		}).catch(err => {
+			console.error('Delete complaint failed:', err.message);
+			res.redirect('/complaint');
+		});
+	};
+
+	if (id) {
+		return doDeleteById(id);
+	}
+	// Fallback: legacy index-based delete
 	Complaint.find().then(complaints => {
 		if (typeof index !== 'undefined' && complaints.length > index) {
 			const toDelete = complaints[index]._id;
-			Complaint.findByIdAndDelete(toDelete).then(() => {
-				res.redirect('/complaint');
-			});
+			doDeleteById(toDelete);
 		} else {
 			res.redirect('/complaint');
 		}
-	});
+	}).catch(() => res.redirect('/complaint'));
 });
 
 
@@ -126,7 +143,6 @@ router.get('/form', function(req, res) {
 						});
 });
 // Handle form submission and store data in a file
-const { saveComplaint } = require('../models/complaint');
 const multer = require('multer');
 const upload = multer({
 	storage: multer.memoryStorage(),
@@ -191,7 +207,29 @@ router.post('/submit-incident', upload.single('photo'), function(req, res) {
 		submittedBy: user.role // Add role information to track who submitted
 	});
 
-	complaint.save().then(() => {
+	complaint.save().then(async (saved) => {
+		// Also store a minimal record in the dashboard collection
+		try {
+			// Parse raised date from form (string) to Date, fallback to now
+			let raisedDate = new Date();
+			if (date) {
+				const parsed = new Date(date);
+				if (!isNaN(parsed.getTime())) {
+					raisedDate = parsed;
+				}
+			}
+			const dashboardItem = new Dashboard({
+				complaintId: saved && saved._id ? saved._id : undefined,
+				complaintType: category,
+				raisedBy: email,
+				raisedDate: raisedDate,
+				status: 'Unsolved'
+			});
+			await dashboardItem.save();
+		} catch (dashErr) {
+			console.error('Failed to save dashboard item:', dashErr.message);
+			// Continue regardless
+		}
 		res.redirect('/complaint');
 	}).catch(err => {
 		res.render('form', {
@@ -204,17 +242,49 @@ router.post('/submit-incident', upload.single('photo'), function(req, res) {
 });
 // Change complaint color to green
 router.post('/change-complaint-color', function(req, res) {
-		const { index } = req.body;
-		Complaint.find().then(complaints => {
-			if (typeof index !== 'undefined' && complaints.length > index) {
-				const toUpdate = complaints[index]._id;
-				Complaint.findByIdAndUpdate(toUpdate, { status: 'solved' }).then(() => {
-					res.redirect('/complaint');
-				});
-			} else {
-				res.redirect('/complaint');
+	const { id, index } = req.body;
+
+	const markSolvedById = async (toUpdateId) => {
+		try {
+			// Update complaint: set explicit solved status and color for UI
+			await Complaint.findByIdAndUpdate(toUpdateId, { status: 'solved', color: 'green' });
+
+			// Get the email of the user performing the action
+			let solverEmail = '';
+			if (req.cookies && req.cookies.token) {
+				try {
+					const jwt = require('jsonwebtoken');
+					const JWT_SECRET = 'securemycampusjwt';
+					const user = jwt.verify(req.cookies.token, JWT_SECRET);
+					solverEmail = user.email;
+				} catch (e) {
+					solverEmail = '';
+				}
 			}
-		});
+			// Update dashboard
+			await Dashboard.findOneAndUpdate(
+				{ complaintId: toUpdateId },
+				{ status: 'Solved', solvedBy: solverEmail, solvedDate: new Date() },
+				{ new: true }
+			);
+		} catch (e) {
+			console.error('Failed to mark solved:', e.message);
+		} finally {
+			res.redirect('/complaint');
+		}
+	};
+
+	if (id) {
+		return markSolvedById(id);
+	}
+	// Fallback: legacy index-based update
+	Complaint.find().then(complaints => {
+		if (typeof index !== 'undefined' && complaints.length > index) {
+			const toUpdate = complaints[index]._id;
+			return markSolvedById(toUpdate);
+		}
+		return res.redirect('/complaint');
+	}).catch(() => res.redirect('/complaint'));
 });
 router.get('/help', async function(req, res) {
 				let user = null;
@@ -309,13 +379,52 @@ router.get('/dashboard', async function(req, res) {
 		complaints = complaints.filter(c => c.category.toLowerCase() !== 'harassment');
 	}
 
+	// Get dashboard data
+	const Dashboard = require('../../models/Dashboard');
+	let dashboardData = await Dashboard.find().sort({ createdAt: -1 });
+
+	// If student, filter out harassment from dashboardData
+	if (user && user.role === 'student') {
+		dashboardData = dashboardData.filter(d => (d.complaintType || '').toLowerCase() !== 'harassment');
+	}
+
 	res.render('dashboard', { 
 		title: 'Dashboard', 
 		email: user.email,
 		user: dbUser || user,
 		complaints: complaints,
+		dashboardData: dashboardData,
 		now: now
 	});
+});
+
+// Route to add sample dashboard data (for testing)
+router.post('/add-dashboard-data', async function(req, res) {
+	let user = null;
+	if (req.cookies && req.cookies.token) {
+		try {
+			user = jwt.verify(req.cookies.token, JWT_SECRET);
+		} catch (e) {
+			user = null;
+		}
+	}
+	
+	// Only admin can add dashboard data
+	if (!user || user.role !== 'admin') {
+		return res.status(403).json({ error: 'Only admins can add dashboard data' });
+	}
+
+	const Dashboard = require('../../models/Dashboard');
+	const { title, description, data } = req.body;
+	
+	const dashboardItem = new Dashboard({
+		title: title || 'Sample Dashboard Item',
+		description: description || 'This is a sample dashboard data entry',
+		data: data || { sample: 'data' }
+	});
+
+	await dashboardItem.save();
+	res.redirect('/dashboard');
 });
 
 // Profile page

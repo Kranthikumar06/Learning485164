@@ -1,4 +1,3 @@
-
 var express = require('express');
 var router = express.Router();
 
@@ -15,45 +14,54 @@ router.get('/', async function(req, res, next) {
     }
   }
 
+  // Get user from database to check role
+  const User = require('../../models/User');
+  let dbUser = null;
+  if (user && user.email) {
+    try {
+      dbUser = await User.findOne({ email: user.email });
+    } catch (err) {
+      console.error('Error fetching user:', err);
+    }
+  }
+
   // Fetch latest complaint
   const Complaint = require('../../models/Complaint');
   let latestComplaint = null;
   try {
     const now = Date.now();
-    latestComplaint = await Complaint.findOne({ 
-      $or: [ 
-        { expiresAt: { $gt: now } }, 
-        { expiresAt: { $exists: false } } 
-      ] 
-    }).sort({ _id: -1 }).limit(1);
+    const userRole = dbUser ? dbUser.role : (user ? user.role : null);
+    // Filter out harassment for students and unauthenticated users (case-insensitive)
+    if (userRole === 'student' || !user) {
+      latestComplaint = await Complaint.findOne({ 
+        category: { $not: { $regex: /^harassment$/i } },
+        $or: [ 
+          { expiresAt: { $gt: now } }, 
+          { expiresAt: { $exists: false } } 
+        ] 
+      }).sort({ _id: -1 }).limit(1);
+    } else {
+      latestComplaint = await Complaint.findOne({ 
+        $or: [ 
+          { expiresAt: { $gt: now } }, 
+          { expiresAt: { $exists: false } } 
+        ] 
+      }).sort({ _id: -1 }).limit(1);
+    }
   } catch (err) {
     console.error('Error fetching latest complaint:', err);
   }
 
   if (user && user.email) {
-    const User = require('../../models/User');
-    User.findOne({ email: user.email }).then(dbUser => {
-      console.log('Home page user object:', dbUser || user);
-      res.render('home', {
-        title: 'Home',
-        email: dbUser ? dbUser.email : user.email,
-        name: dbUser ? dbUser.name : user.name,
-        username: dbUser ? dbUser.username : user.username,
-        phone: dbUser ? dbUser.phone : user.phone,
-        user: dbUser || user,
-        latestComplaint: latestComplaint
-      });
-    }).catch(err => {
-      console.log('Home page user object (error):', user);
-      res.render('home', {
-        title: 'Home',
-        email: user.email,
-        name: user.name,
-        username: user.username,
-        phone: user.phone,
-        user: user,
-        latestComplaint: latestComplaint
-      });
+    console.log('Home page user object:', dbUser || user);
+    res.render('home', {
+      title: 'Home',
+      email: dbUser ? dbUser.email : user.email,
+      name: dbUser ? dbUser.name : user.name,
+      username: dbUser ? dbUser.username : user.username,
+      phone: dbUser ? dbUser.phone : user.phone,
+      user: dbUser || user,
+      latestComplaint: latestComplaint
     });
   } else {
     res.render('home', {

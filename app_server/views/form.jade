@@ -14,9 +14,13 @@ html(lang="en")
       .profile-top-right
 
       .form-container
+        h1(style="text-align:center;margin-bottom:1.5rem;color:#e50000;font-size:2rem;") Report an Issue
         form(action="/submit-incident", method="post", enctype="multipart/form-data")
           label(for="name") Name
           input(type="text", id="name", name="name", required=true)
+          label(for="email") Email
+          //- Prefill from server context; readonly to prevent mismatch with authenticated user
+          input(type="email", id="email", name="email", required=true, value=email || '', readonly=true)
           label(for="phone") Phone Number
           input(type="tel", id="phone", name="phone", required=true, pattern="[0-9]{10}")
           label(for="date") Date

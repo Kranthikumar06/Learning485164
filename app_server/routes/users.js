@@ -354,21 +354,6 @@ router.get('/auth/google/callback',
   }
 );
 
-router.get('/test-users-json-write', function(req, res) {
-  const filePath = path.join(__dirname, '../../data/users.json');
-  let original = '';
-  try {
-    if (fs.existsSync(filePath)) {
-      original = fs.readFileSync(filePath, 'utf8');
-    }
-    fs.writeFileSync(filePath, JSON.stringify([{test: 'write'}], null, 2));
-    // Restore original
-    fs.writeFileSync(filePath, original);
-    res.send('users.json is writable');
-  } catch (e) {
-    res.send('users.json is NOT writable: ' + e.message);
-  }
-});
 router.get('/signup', function(req, res) {
   let email = '';
   if (req.cookies && req.cookies.token) {
