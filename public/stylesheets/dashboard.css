@@ -1,9 +1,4 @@
-.main-content {
-  margin-top: -152px !important;
-  padding: 2rem 0;
-  background: linear-gradient(135deg, #e3f2fd, #e1bee7);
-  box-shadow: none !important;
-}
+
 :root {
   /* Primitive Color Tokens */
   --color-white: rgba(255, 255, 255, 1);
