@@ -1,0 +1,52 @@
+extends layout
+
+block head
+  link(rel='stylesheet', href='/stylesheets/feedback.css')
+
+block content
+  //- Main Section
+  main
+    .feedback-card
+      h2 Share Your Feedback 💬
+      p We value your input to make the campus a better place.
+
+      if typeof success !== 'undefined' && success
+        .success-message(style="color:#28a745;margin-bottom:16px;font-weight:bold;padding:12px;background:#d4edda;border:1px solid #c3e6cb;border-radius:8px;") #{success}
+      if typeof error !== 'undefined' && error
+        .error-message(style="color:#d32f2f;margin-bottom:16px;font-weight:bold;padding:12px;background:#f8d7da;border:1px solid #f5c6cb;border-radius:8px;") #{error}
+
+      form(action="/submit-feedback", method="post")
+        label(for="name") Full Name
+        input#name(type="text", name="name", placeholder="Enter your name", value=user && user.name ? user.name : '', required)
+
+        label(for="email") Email ID
+        input#email(type="email", name="email", placeholder="Enter your email", value=email || '', readonly, required)
+
+        label(for="type") Feedback Type
+        select#type(name="type", required)
+          option(value="") Select Type
+          option(value="Issue") Issue
+          option(value="Suggestion") Suggestion
+          option(value="Appreciation") Appreciation
+
+        label Rate Your Experience
+        input#ratingValue(type="hidden", name="rating", value="0", required)
+        .rating#rating
+          span(data-value="1") ★
+          span(data-value="2") ★
+          span(data-value="3") ★
+          span(data-value="4") ★
+          span(data-value="5") ★
+
+        label(for="message") Your Feedback
+        textarea#message(name="message", placeholder="Write your feedback here...", required)
+
+        button(type="submit") Submit Feedback
+
+  footer
+    p © 2025 Secure My Campus | 
+      a(href="#") Privacy Policy
+      |  | 
+      a(href="/faqs") FAQs
+
+  script(src="/javascripts/feedback.js")

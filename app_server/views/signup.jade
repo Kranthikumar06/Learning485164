@@ -1,0 +1,55 @@
+extends layout
+
+block content
+  header.navbar
+    .navbar-left
+      .logo-container
+        img(src="/images/Campus.png", alt="Secure My Campus Logo")
+        div
+          span Secure
+          span My Campus
+      nav.nav-links
+        a(href="/") Home
+        a(href="/complaint") Complaint Box
+        a(href="/users/signup") Sign Up
+        a(href="/users/signin") Sign In
+    .navbar-right
+      .avatar-wrap
+        if email
+          a(href="/profile", title="Profile")
+            img.avatar(src="/images/profile.png", alt="Profile")
+  .content
+    .login-card
+      if typeof error !== 'undefined' && error
+        .error-message(style="color:#d32f2f;margin-bottom:16px;font-weight:bold;") #{error}
+      form(action="/users/signup", method="post")
+        h2 Create Your Account
+        .input-group
+          label(for="username") Username
+          input(type="text", id="username", name="username", placeholder="Choose a username")
+        .input-group
+          label(for="phone") Phone Number
+          input(type="tel", id="phone", name="phone", placeholder="Enter your phone number", required)
+        .input-group
+          label(for="email") Email Address
+          input(type="email", id="email", name="email", placeholder="Enter your email")
+        .input-group
+          label(for="password") Password
+          input(type="password", id="password", name="password", placeholder="Enter your password", required)
+        .input-group
+          label(for="confirm_password") Confirm Password
+          input(type="password", id="confirm_password", name="confirm_password", placeholder="Confirm your password", required)
+        button(type="submit", class="btn")
+          span Sign Up
+        .links
+          a(href="/users/signin", onclick="goToLogin(event)") Already have an account? Login
+        .social-login-center(style="display:flex; justify-content:center; align-items:center; margin-top:20px;")
+          a(href="/users/auth/google", class="social-btn google-btn", title="Google Login", style="display:flex; align-items:center; background:#eaf2fe; border-radius:10px; padding:12px 0; width:100%; max-width:340px; text-decoration:none; box-shadow:0 2px 8px rgba(0,0,0,0.04); justify-content:center; margin:0 auto;")
+            img(src="/images/Screenshot 2025-09-09 144051.png", alt="Google icon", class="google-icon", style="height:24px;width:24px;margin-right:12px;border-radius:50%;object-fit:cover;")
+            span(style="font-size:18px; color:#4285f4; font-weight:500;") Continue with Google
+    script(src="/javascripts/signup.js")
+  footer
+    p © 2025 Secure My Campus | 
+      a(href="#") Privacy Policy
+      |  | 
+      a(href="/faqs") FAQs

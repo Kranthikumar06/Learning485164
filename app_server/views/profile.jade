@@ -1,0 +1,43 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Secure My Campus - Profile
+    link(href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap", rel="stylesheet")
+    link(rel="stylesheet", href="/stylesheets/profile.css")
+  body
+    .profile-container
+      div(style="flex:1;")
+        .profile-title Profile
+        .profile-fields
+          .profile-field
+            label User Name
+            .field-value#profileName #{user && user.name ? user.name : 'Not set'}
+          .profile-field
+            label E-mail
+            .field-value#profileEmail #{user && user.email ? user.email : 'Not set'}
+          .profile-field
+            label Password
+            .field-value.password#profilePassword ••••••••
+          .profile-field
+            label Location
+            .field-value#profileLocation #{user && user.location ? user.location : 'Not set'}
+          .profile-field
+            label Phone
+            .field-value#profilePhone #{user && user.phone ? user.phone : 'Not set'}
+        .profile-actions
+          button.back(onclick="goBack()") Back
+          a(href="/users/edit-profile", class="edit") Edit
+          button.logout(onclick="logoutUser()") Logout
+      .profile-image-section
+        if user && user._id && user.photo && user.photo.data
+          img(src="/profile-image/" + user._id, alt="Profile Photo", style="width:120px;height:120px;border-radius:50%;object-fit:cover;")
+        else
+          img(src="/images/profile.png", alt="Default Profile", style="width:120px;height:120px;border-radius:50%;object-fit:cover;")
+    footer
+      p © 2025 Secure My Campus | 
+        a(href="#") Privacy Policy
+        |  
+        a(href="/faqs") FAQs
+    script(src="/javascripts/profile.js")

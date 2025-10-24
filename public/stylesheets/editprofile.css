@@ -1,0 +1,345 @@
+/* Edit Profile form styles: underline-only inputs and reduced spacing */
+.profile-fields {
+  gap: 12px; /* reduce vertical spacing between fields */
+  margin-top: 16px;
+  max-width: 420px;
+}
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0px 0px 6px 0px;
+  border-bottom: none; /* remove the full box bottom border from older styles */
+}
+.profile-field label {
+  font-size: 15px;
+  color: #666;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.profile-field input[type="text"],
+.profile-field input[type="email"],
+.profile-field input[type="tel"],
+.profile-field input[type="password"] {
+  border: none;
+  border-bottom: 2px solid #e6e6e6;
+  padding: 8px 0px;
+  font-size: 15px;
+  outline: none;
+  background: transparent;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.profile-field input::placeholder {
+  color: #bdbdbd;
+}
+.profile-field input:focus {
+  border-bottom-color: #4a90e2; /* accent color */
+  box-shadow: 0 4px 18px rgba(74,144,226,0.08);
+}
+/* file input should keep a small top margin */
+.profile-field input[type="file"] {
+  padding: 6px 0;
+  border: none;
+}
+/* make the save/cancel buttons a little closer to the fields */
+.profile-actions {
+  margin-top: 18px;
+  gap: 12px;
+}
+/* make avatar section adapt to smaller spacing */
+.profile-image-section {
+  margin-top: 40px;
+}
+/* mobile tweaks */
+@media (max-width: 600px) {
+  .profile-fields { gap: 10px; }
+  .profile-field input { font-size: 15px; }
+}
+
+/* Higher-specificity overrides to ensure edit profile styles win over global CSS */
+.profile-container .profile-left .profile-fields {
+  gap: 12px !important;
+  margin-top: 16px !important;
+  max-width: 420px !important;
+}
+.profile-container .profile-left .profile-field {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  padding: 0 0 6px 0 !important;
+  border-bottom: none !important;
+}
+.profile-container .profile-left .profile-field label {
+  font-size: 15px !important;
+  color: #666 !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  margin-bottom: 0 !important;
+}
+.profile-container .profile-left .profile-field input[type="text"],
+.profile-container .profile-left .profile-field input[type="email"],
+.profile-container .profile-left .profile-field input[type="tel"],
+.profile-container .profile-left .profile-field input[type="password"] {
+  border: none !important;
+  border-bottom: 2px solid #e6e6e6 !important;
+  padding: 8px 0 !important;
+  font-size: 15px !important;
+  outline: none !important;
+  background: transparent !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+}
+.profile-container .profile-left .profile-field input:focus {
+  border-bottom-color: #4a90e2 !important;
+  box-shadow: 0 4px 18px rgba(74,144,226,0.08) !important;
+}
+
+/* Avatar margin adjustments for edit profile */
+.profile-container .profile-image-section {
+  margin-top: 114px !important;
+  margin-left: 10px !important;
+}
+
+.profile-avatar {
+  width: 120px !important;
+  height: 120px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 2px solid #e6e6e6 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+/* Edit profile: override container layout to match requested design */
+.profile-container {
+  border-radius: 18px !important;
+  box-shadow: 0 8px 32px rgba(74,144,226,0.10) !important;
+  max-width: 900px !important;
+  width: 95% !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 40px !important;
+  padding: 30px 40px 32px 40px !important;
+  position: relative !important;
+  animation: fadeInUp 0.8s cubic-bezier(.23, 1.01, .32, 1) both !important;
+  margin-top: 15px !important;
+}
+
+/* Title overrides for edit profile */
+.profile-container .profile-left .profile-title {
+  font-family: 'Poppins', sans-serif !important;
+  font-size: 64px !important;
+  font-weight: 700 !important;
+  color: #111 !important;
+  margin-bottom: 18px !important;
+  letter-spacing: 2px !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  width: 174% !important;
+  animation: fadeInUp 1s !important;
+  margin-left: 25px !important;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablet landscape (up to 1024px) */
+@media (max-width: 1024px) {
+  .profile-container {
+    max-width: 700px !important;
+    padding: 30px 32px !important;
+    gap: 32px !important;
+  }
+  
+  .profile-container .profile-left .profile-title {
+    font-size: 52px !important;
+    width: 160% !important;
+    margin-left: 15px !important;
+  }
+  
+  .profile-fields,
+  .profile-container .profile-left .profile-fields {
+    max-width: 380px !important;
+  }
+  
+  .profile-container .profile-image-section {
+    margin-top: 100px !important;
+    min-width: 180px !important;
+  }
+  
+  .profile-avatar {
+    width: 110px !important;
+    height: 110px !important;
+  }
+}
+
+/* Tablet portrait and smaller (max-width: 768px) */
+@media (max-width: 768px) {
+  .profile-container {
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 32px 24px !important;
+    gap: 24px !important;
+    width: 100% !important;
+  }
+  
+  .profile-container .profile-left {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .profile-container .profile-left .profile-title {
+    font-size: 48px !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-bottom: 24px !important;
+  }
+  
+  .profile-fields,
+  .profile-container .profile-left .profile-fields {
+    max-width: 100% !important;
+    width: 100%;
+    margin-top: 16px !important;
+  }
+  
+  .profile-container .profile-image-section {
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    margin-bottom: 16px !important;
+    order: -1;
+    min-width: auto !important;
+  }
+  
+  .profile-avatar {
+    width: 120px !important;
+    height: 120px !important;
+  }
+  
+  .profile-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .profile-actions button {
+    padding: 12px 28px !important;
+    font-size: 16px !important;
+  }
+}
+
+/* Mobile phones (max-width: 480px) */
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 24px 16px !important;
+    border-radius: 12px !important;
+    gap: 16px !important;
+  }
+  
+  .profile-container .profile-left .profile-title {
+    font-size: 36px !important;
+    letter-spacing: 1px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  .profile-avatar {
+    width: 100px !important;
+    height: 100px !important;
+    border: 4px solid #fff !important;
+  }
+  
+  .profile-fields,
+  .profile-container .profile-left .profile-fields {
+    gap: 14px !important;
+    margin-top: 12px !important;
+  }
+  
+  .profile-field,
+  .profile-container .profile-left .profile-field {
+    gap: 4px !important;
+    padding-bottom: 8px !important;
+  }
+  
+  .profile-field label,
+  .profile-container .profile-left .profile-field label {
+    font-size: 13px !important;
+    letter-spacing: 0.5px !important;
+  }
+  
+  .profile-field input[type="text"],
+  .profile-field input[type="email"],
+  .profile-field input[type="tel"],
+  .profile-field input[type="password"],
+  .profile-container .profile-left .profile-field input[type="text"],
+  .profile-container .profile-left .profile-field input[type="email"],
+  .profile-container .profile-left .profile-field input[type="tel"],
+  .profile-container .profile-left .profile-field input[type="password"] {
+    font-size: 16px !important;
+    padding: 10px 0 !important;
+  }
+  
+  .profile-field input[type="file"],
+  .profile-container .profile-left .profile-field input[type="file"] {
+    font-size: 14px !important;
+  }
+  
+  .profile-actions {
+    margin-top: 24px !important;
+    flex-direction: column;
+    width: 100%;
+    gap: 12px !important;
+  }
+  
+  .profile-actions button {
+    width: 100% !important;
+    padding: 14px 24px !important;
+    font-size: 16px !important;
+    letter-spacing: 1px !important;
+    margin: 0 !important;
+  }
+  
+  /* Make file input more touch-friendly on mobile */
+  .profile-field input[type="file"] {
+    padding: 10px 0 !important;
+  }
+}
+
+/* Extra small mobile (max-width: 360px) */
+@media (max-width: 360px) {
+  .profile-container {
+    padding: 20px 12px !important;
+  }
+  
+  .profile-container .profile-left .profile-title {
+    font-size: 28px !important;
+  }
+  
+  .profile-avatar {
+    width: 80px !important;
+    height: 80px !important;
+    border: 3px solid #fff !important;
+  }
+  
+  .profile-field label,
+  .profile-container .profile-left .profile-field label {
+    font-size: 12px !important;
+  }
+  
+  .profile-field input[type="text"],
+  .profile-field input[type="email"],
+  .profile-field input[type="tel"],
+  .profile-field input[type="password"],
+  .profile-container .profile-left .profile-field input[type="text"],
+  .profile-container .profile-left .profile-field input[type="email"],
+  .profile-container .profile-left .profile-field input[type="tel"],
+  .profile-container .profile-left .profile-field input[type="password"] {
+    font-size: 15px !important;
+  }
+  
+  .profile-actions button {
+    padding: 12px 20px !important;
+    font-size: 15px !important;
+  }
+}

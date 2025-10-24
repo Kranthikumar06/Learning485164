@@ -1,0 +1,88 @@
+extends layout
+
+block head
+  link(rel='stylesheet', href='/stylesheets/dashboard.css')
+
+block content
+  header.navbar
+    .navbar-left
+      .logo-container
+        img(src="/images/Campus.png", alt="Secure My Campus Logo")
+        div
+          span Secure
+          span My Campus
+      button#mobileMenuBtn.navbar-toggle
+        span
+        span
+        span
+      nav.nav-links
+        a(href="/") Home
+        a(href="/complaint") Complaint Box
+        if email
+          a(href="/dashboard") Dashboard
+          a(href="/faqs") FAQs
+        else
+          a(href="/users/signup") Sign Up
+          a(href="/users/signin") Sign In
+    .navbar-right
+      .avatar-wrap
+        if email
+          a(href="/profile", title="Profile")
+            if user && user.photo && user.photo.data
+              img.avatar(src='/profile-image/' + user._id, alt="Profile Photo")
+            else
+              img.avatar(src="/images/profile.png", alt="Profile")
+  main.main-content
+      .container
+        .content-header
+          h1.page-title Complaints
+          .header-actions
+            .search-container
+              input.search-input(type="text", placeholder="Search by email or type...", id="searchInput")
+              .search-icon
+                svg(width="20", height="20", viewBox="0 0 24 24", fill="none", xmlns="http://www.w3.org/2000/svg")
+                  path(d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z", stroke="currentColor", stroke-width="2", stroke-linecap="round", stroke-linejoin="round")
+            .filters
+              select.filter-select#typeFilter
+                option(value="") All Types
+                option(value="Harassment") Harassment
+                option(value="Lost & Found") Lost & Found
+                option(value="Food Issue") Food Issue
+                option(value="Hostel Issue") Hostel Issue
+              select.filter-select#statusFilter
+                option(value="") All Status
+                option(value="Unsolved") Unsolved
+                option(value="Solved") Solved
+
+
+        // Desktop Table View
+        .table-container.desktop-table
+          table.complaints-table
+            thead
+              tr
+                th S.No
+                th Complaint Type
+                th Raised By
+                th Raised Date
+                th Status
+                th Solved By
+                th Solved Date
+            tbody#complaintsTableBody
+              // Populated by JavaScript
+
+        // Mobile Cards View
+        .mobile-cards#mobileCards
+          // Populated by JavaScript
+
+        // No Results Message
+        .no-results#noResults(style="display: none;")
+          .no-results-content
+            svg(width="64", height="64", viewBox="0 0 24 24", fill="none", xmlns="http://www.w3.org/2000/svg")
+              path(d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z", stroke="currentColor", stroke-width="2", stroke-linecap="round", stroke-linejoin="round")
+            h3 No complaints found
+            p Try adjusting your search or filter criteria
+
+  script.
+    window.dashboardComplaints = !{JSON.stringify(dashboardData || [])};
+    window.complaintsFallback = !{JSON.stringify(complaints || [])};
+  script(src="/javascripts/dashboard.js")
