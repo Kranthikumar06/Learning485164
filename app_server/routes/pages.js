@@ -20,7 +20,57 @@ router.post('/delete-complaint', function(req, res) {
 			} catch (e) {
 				console.error('Failed to delete dashboard item for complaint:', e.message);
 			}
-			res.redirect('/complaint');
+				// Send confirmation email to user after complaint registration
+				try {
+								const sgMail = require('@sendgrid/mail');
+								sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+								const formattedDate = date ? new Date(date).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) : new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
+								const msg = {
+										to: email,
+										from: process.env.EMAIL_USER, // Must be a verified sender in SendGrid
+										subject: 'Complaint Registered - Secure My Campus',
+										html: `
+										<div style="font-family: Arial, sans-serif; background: #f9f9f9; padding: 32px;">
+											<div style="max-width: 520px; margin: auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px #e0e0e0; padding: 32px;">
+												<h2 style="color: #2a5298; text-align: center; margin-bottom: 24px;">Secure My Campus</h2>
+												<p style="font-size: 18px; color: #333;">Dear <b>${name || email}</b>,</p>
+												<p style="font-size: 16px; color: #444;">Your complaint has been <b style='color: #388e3c;'>successfully registered</b> in Secure My Campus.</p>
+												<table style="width: 100%; border-collapse: collapse; margin: 24px 0;">
+													<tr>
+														<td style="padding: 8px; font-weight: bold; color: #2a5298;">Category:</td>
+														<td style="padding: 8px;">${category}</td>
+													</tr>
+													<tr>
+														<td style="padding: 8px; font-weight: bold; color: #2a5298;">Description:</td>
+														<td style="padding: 8px;">${description}</td>
+													</tr>
+													<tr>
+														<td style="padding: 8px; font-weight: bold; color: #2a5298;">Date Submitted:</td>
+														<td style="padding: 8px;">${formattedDate}</td>
+													</tr>
+													<tr>
+														<td style="padding: 8px; font-weight: bold; color: #2a5298;">Phone:</td>
+														<td style="padding: 8px;">${phone || 'Not provided'}</td>
+													</tr>
+													<tr>
+														<td style="padding: 8px; font-weight: bold; color: #2a5298;">Location:</td>
+														<td style="padding: 8px;">${location || 'Not provided'}</td>
+													</tr>
+												</table>
+												<p style="font-size: 15px; color: #555;">We will address your issue as soon as possible. You can track your complaint status by logging into the Secure My Campus portal.</p>
+												<div style="text-align: center; margin-top: 32px;">
+													<a href="https://securemycampus.com" style="background: #2a5298; color: #fff; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-size: 16px;">Go to Portal</a>
+												</div>
+												<p style="margin-top: 32px; font-size: 13px; color: #aaa; text-align: center;">Thank you for helping us improve our campus!<br>Secure My Campus Team</p>
+											</div>
+										</div>
+										`
+								};
+								await sgMail.send(msg);
+				} catch (mailErr) {
+					// Optionally log or ignore email errors, but do not block complaint registration
+				}
+				res.redirect('/complaint');
 		}).catch(err => {
 			console.error('Delete complaint failed:', err.message);
 			res.redirect('/complaint');
@@ -230,6 +280,44 @@ router.post('/submit-incident', upload.single('photo'), function(req, res) {
 			console.error('Failed to save dashboard item:', dashErr.message);
 			// Continue regardless
 		}
+				// Send confirmation email to user after complaint registration
+				try {
+						const sgMail = require('@sendgrid/mail');
+						sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+						const formattedDate = date ? new Date(date).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB');
+						const status = 'Unsolved';
+						const statusColor = status === 'Unsolved' ? '#d32f2f' : '#388e3c';
+						const msg = {
+								to: email,
+								from: process.env.EMAIL_USER, // Must be a verified sender in SendGrid
+								subject: 'Complaint Registered Successfully',
+								html: `
+								<div style="font-family: Arial, sans-serif; background: #f6f7fb; padding: 32px;">
+									<div style="max-width: 600px; margin: auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px #e0e0e0; padding: 32px;">
+										<h2 style="color: #0070f3; margin-bottom: 18px;">Complaint Registered Successfully</h2>
+										<p style="font-size: 17px; color: #222; margin-bottom: 8px;">Dear ${name || email},</p>
+										<p style="font-size: 16px; color: #333; margin-bottom: 24px;">Your complaint has been successfully registered with Secure My Campus.<br>We will review and address it as soon as possible.</p>
+										<div style="background: #f4f8fc; border-left: 4px solid #2196f3; border-radius: 8px; padding: 18px 20px 14px 20px; margin-bottom: 24px;">
+											<div style="font-weight: bold; color: #1976d2; font-size: 16px; margin-bottom: 10px;">Complaint Details:</div>
+											<div style="margin-bottom: 6px;"><span style="font-weight: bold; color: #222;">Category:</span> ${category}</div>
+											<div style="margin-bottom: 6px;"><span style="font-weight: bold; color: #222;">Location:</span> ${location || 'Not provided'}</div>
+											<div style="margin-bottom: 6px;"><span style="font-weight: bold; color: #222;">Description:</span> ${description}</div>
+											<div style="margin-bottom: 6px;"><span style="font-weight: bold; color: #222;">Date Submitted:</span> ${formattedDate}</div>
+											<div style="margin-bottom: 6px;"><span style="font-weight: bold; color: #222;">Status:</span> <span style="color: ${statusColor}; font-weight: bold;">${status}</span></div>
+										</div>
+										<p style="font-size: 15px; color: #333; margin-bottom: 18px;">You can track the status of your complaint by visiting the <a href="https://securemycampus.com/complaint" style="color: #1976d2; text-decoration: underline;">Complaint Box</a>.</p>
+										<p style="font-size: 15px; color: #333; margin-bottom: 18px;">You can track the status of your complaint by visiting the <a href="${process.env.BASE_URL || 'http://localhost:3000'}/complaint" style="color: #1976d2; text-decoration: underline;">Complaint Box</a>.</p>
+										<p style="font-size: 15px; color: #666; margin-bottom: 18px;">Thank you for helping us maintain a safe campus environment.</p>
+										<div style="margin-top: 24px; font-size: 15px; color: #222;">Best regards,<br><span style="font-weight: bold; color: #222;">Secure My Campus Team</span></div>
+										<div style="margin-top: 32px; text-align: center; color: #aaa; font-size: 12px;">This is an automated email. Please do not reply to this message.</div>
+									</div>
+								</div>
+								`
+						};
+						await sgMail.send(msg);
+				} catch (mailErr) {
+						// Optionally log or ignore email errors, but do not block complaint registration
+				}
 		res.redirect('/complaint');
 	}).catch(err => {
 		res.render('form', {
