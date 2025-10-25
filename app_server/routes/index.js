@@ -89,7 +89,6 @@ router.get('/', async function(req, res, next) {
   }
 
   if (user && user.email) {
-    console.log('Home page user object:', dbUser || user);
     res.render('home', {
       title: 'Home',
       email: dbUser ? dbUser.email : user.email,
