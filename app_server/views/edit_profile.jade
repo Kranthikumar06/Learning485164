@@ -1,0 +1,51 @@
+extends layout
+
+block head
+  link(rel='stylesheet', href='/stylesheets/editprofile.css')
+
+block content
+  .profile-container
+    .profile-left
+      .profile-title Edit Profile
+      form(action="/users/edit-profile", method="POST", enctype="multipart/form-data")
+        .profile-fields
+          .profile-field
+            label User Name
+            input(type="text", name="name", id="name", value=name || '', required)
+          .profile-field
+            label E-mail
+            input(type="email", name="email", id="email", value=email || '', required)
+          .profile-field
+            label Password (leave blank to keep current)
+            input(type="password", name="password", id="password", placeholder="New password")
+          .profile-field
+            label Confirm Password
+            input(type="password", name="confirm_password", id="confirm_password", placeholder="Confirm new password")
+          .profile-field
+            label Location
+            input(type="text", name="location", id="location", value=location || '')
+          .profile-field
+            label Phone
+            input(type="tel", name="phone", id="phone", value=phone || '')
+          .profile-field
+            label Profile Photo
+            input(type="file", name="photo", id="photo", accept="image/*")
+        .profile-actions
+          button(type="submit", class="edit btn-success") Save Changes
+          button(type="button", class="back", onclick="window.location.href='/profile'") Cancel
+
+    .profile-image-section
+      if user && user._id && user.photo && user.photo.data
+        img.profile-avatar(src="/profile-image/" + user._id, alt="Profile Photo")
+      else
+        img.profile-avatar(src="/images/profile.png", alt="Profile Photo")
+
+  // footer stays outside the card and is part of the page layout
+  footer
+    p © 2025 Secure My Campus | 
+      a(href="#") Privacy Policy
+      |  
+      a(href="/faqs") FAQs
+
+block scripts
+  script(src='/javascripts/profile.js')
