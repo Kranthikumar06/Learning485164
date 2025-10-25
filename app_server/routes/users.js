@@ -104,7 +104,6 @@ router.post('/edit-profile', upload.single('photo'), async function(req, res) {
   }
 
   const { name, location, phone, password, confirm_password } = req.body;
-  console.log('Attempting profile update for:', user.email);
   try {
     // Prepare update object
     let updateObj = { 
@@ -122,13 +121,6 @@ router.post('/edit-profile', upload.single('photo'), async function(req, res) {
       };
     }
 
-    console.log('Update data:', { 
-      name, 
-      location, 
-      phone, 
-      photoUploaded: !!req.file, 
-      passwordProvided: !!password 
-    });
     if (password && password.length > 0) {
       if (password !== confirm_password) {
         return res.render('edit_profile', { title: 'Edit Profile', error: 'Passwords must match.', user: dbUser, name, email: user.email, location, phone });
@@ -148,7 +140,6 @@ router.post('/edit-profile', upload.single('photo'), async function(req, res) {
       return res.render('edit_profile', { title: 'Edit Profile', error: 'User not found.', user });
     }
 
-    console.log('Profile updated:', updatedUser);
     return res.redirect('/profile');
   } catch (err) {
     console.error('Profile update error:', err);
@@ -287,7 +278,6 @@ router.get('/auth/google/callback',
         
         try {
           await sgMail.send(msg);
-          console.log('Verification email sent');
         } catch (error) {
           console.error('Error sending verification email:', error);
         }
@@ -300,7 +290,6 @@ router.get('/auth/google/callback',
       }
 
       if (!dbUser.isVerified) {
-        console.log('BLOCKED: Google user not verified:', dbUser.email);
         
         if (!dbUser.verificationToken) {
           dbUser.verificationToken = require('crypto').randomBytes(32).toString('hex');
@@ -319,7 +308,6 @@ router.get('/auth/google/callback',
         
         try {
           await sgMail.send(msg);
-          console.log('Verification email sent');
         } catch (error) {
           console.error('Error sending verification email:', error);
         }
@@ -332,7 +320,6 @@ router.get('/auth/google/callback',
       }
 
       // Only verified users reach here
-      console.log('LOGIN: Google user verified:', dbUser.email);
       const token = jwt.sign({
         email: dbUser.email,
         name: dbUser.name,
@@ -449,7 +436,7 @@ router.post('/signup', async function(req, res) {
     };
     sgMail.send(msg)
       .then(() => {
-        console.log('Verification email sent');
+        // Verification email sent
       })
       .catch((error) => {
         console.error('Error sending verification email:', error);
