@@ -1,0 +1,122 @@
+extends layout
+
+block head
+  link(rel='stylesheet', href='/stylesheets/faqs.css')
+
+block content
+  header.navbar
+    .navbar-left
+      .logo-container
+        img(src="/images/Campus.png", alt="Secure My Campus Logo")
+        div
+          span Secure
+          span My Campus
+      button#mobileMenuBtn.navbar-toggle
+        span
+        span
+        span
+      nav.nav-links
+        a(href="/") Home
+        a(href="/complaint") Complaint Box
+        if email
+          a(href="/dashboard") Dashboard
+          a(href="/faqs") FAQs
+        else
+          a(href="/users/signup") Sign Up
+          a(href="/users/signin") Sign In
+    .navbar-right
+      .avatar-wrap
+        if email
+          a(href="/profile", title="Profile")
+            if user && user.photo && user.photo.data
+              img.avatar(src='/profile-image/' + user._id, alt="Profile Photo")
+            else
+              img.avatar(src="/images/profile.png", alt="Profile")
+
+  //- FAQ Section
+  section.faq-section
+    h1 Frequently Asked Questions
+    p Find answers to the most common queries about Secure My Campus.
+
+    .faq-item
+      .faq-question 1. What is Secure My Campus?
+      .faq-answer A web platform where students can easily raise and track campus-related issues.
+
+    .faq-item
+      .faq-question 2. How do I submit a complaint?
+      .faq-answer Go to the Complaint Box page, fill out the form, and submit your issue.
+
+    .faq-item
+      .faq-question 3. How can I check complaint status?
+      .faq-answer Login and view the "Complaints" table in your dashboard.
+
+    .faq-item
+      .faq-question 4. Can I raise an anonymous issue?
+      .faq-answer Yes, you can choose to hide your identity for sensitive issues.
+
+    .faq-item
+      .faq-question 5. How soon will my issue be resolved?
+      .faq-answer Most complaints are addressed within 3–5 working days.
+
+    .faq-item
+      .faq-question 6. Can I upload evidence?
+      .faq-answer Yes, attach images or documents as supporting proof.
+
+    //- New FAQs
+    .faq-item
+      .faq-question 7. Can I report maintenance issues?
+      .faq-answer Yes, you can report issues related to electricity, water, or infrastructure through the complaint form.
+
+    .faq-item
+      .faq-question 8. How will I know if my complaint is resolved?
+      .faq-answer You'll receive a status update and resolution message once the complaint is closed.
+
+    .faq-item
+      .faq-question 9. What if I forgot my password?
+      .faq-answer Use the "Forgot Password" link on the login page to reset your credentials securely.
+
+    .faq-item
+      .faq-question 10. Can I give feedback about the platform?
+      .faq-answer Absolutely! Visit our Feedback page and share your suggestions to help us improve.
+
+  //- Feedback Button Section
+  section.feedback-section
+    h2 Still have questions or suggestions?
+    p We'd love to hear from you!
+    a.feedback-btn(href="/feedback", target="_blank") Share Your Feedback
+
+  //- Footer
+  footer
+    h2 Meet Our Creators
+    .creators
+      .creator-card
+        img(src="/images/Campus.png", alt="Sree Charan")
+        h3 Sree Charan
+        p Frontend Developer
+      .creator-card
+        img(src="/images/Campus.png", alt="Keerthan")
+        h3 Keerthan
+        p Backend Developer
+      .creator-card
+        img(src="/images/Campus.png", alt="Kranthi")
+        h3 Kranthi
+        p Database Administrator
+    p © 2025 Secure My Campus | 
+      a(href="#") Privacy Policy
+      |  | 
+      a(href="/faqs") FAQs
+
+  script(src="/javascripts/faqs.js")
+  script.
+    // Mobile menu toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const navLinks = document.querySelector('.nav-links');
+      
+      if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', function() {
+          navLinks.classList.toggle('show');
+          this.classList.toggle('active');
+        });
+      }
+    });

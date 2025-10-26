@@ -1,0 +1,326 @@
+extends layout
+
+
+block head
+  link(rel='stylesheet', href='/stylesheets/card.css')
+  style.
+    /* Report Issue Button - positioned bottom right of navbar */
+    .report-issue-container {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      z-index: 999;
+    }
+    .report-issue-btn {
+      background: #d10606ff;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+    .report-issue-btn:hover {
+      background: #0056b3;
+      box-shadow: 0 6px 16px rgba(0,123,255,0.4);
+      transform: translateY(-2px);
+    }
+    /* Make the filter bar fixed/sticky and keep complaint type in a single non-wrapping row */
+    .filter-bar{
+      position: -webkit-sticky;
+      position: sticky;
+      top: 90px; /* adjust if your navbar height differs */
+      z-index: 950;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(6px);
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(30,40,50,0.06);
+      margin-bottom: 20px;
+    }
+    .filter-bar .filter-group{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      white-space: nowrap; /* keep contents on single line */
+      overflow: auto; /* allow horizontal scroll if necessary */
+    }
+    .filter-bar .filter-group button{
+      white-space: nowrap;
+    }
+    /* ensure the left group (Complaint Type) doesn't collapse when space is tight */
+    .filter-bar .filter-group[data-type='category']{
+      flex: 1 1 auto;
+      min-width: 320px;
+    }
+    /* smaller screens: allow horizontal scrolling inside filter groups */
+    @media (max-width:760px){
+      .filter-bar{padding:10px; top:70px}
+      .filter-bar .filter-group{gap:8px}
+    }
+
+block content
+  
+  header.navbar
+    .navbar-left
+      .logo-container
+        img(src="/images/Campus.png", alt="Secure My Campus Logo")
+        div
+          span Secure
+          span My Campus
+      nav.nav-links
+        a(href="/") Home
+        a(href="/complaint") Complaint Box
+        if email
+          a(href="/dashboard") Dashboard
+          a(href="/faqs") FAQs
+        else
+          a(href="/users/signup") Sign Up
+          a(href="/users/signin") Sign In
+    .navbar-right
+      .avatar-wrap
+        if email
+          a(href="/profile", title="Profile")
+            if typeof user !== 'undefined' && user && user.photo && user.photo.data
+              img.avatar(src='/profile-image/' + user._id, alt="Profile Photo")
+            else
+              img.avatar(src="/images/profile.png", alt="Profile")
+  
+  // Report Issue Button - positioned bottom right below navbar
+  .report-issue-container
+    a.report-issue-btn(href="/form", target="_blank") Report an Issue
+  
+  .main-content(style='margin-top:80px;')
+    // Filter bar with category + status buttons (client-side controls)
+    .filter-bar
+      .filter-group(data-type='category')
+        span Complaint Type:
+        // dynamic category buttons (render 'All' plus categories)
+        button.active(data-filter='All',style="margin-top: 0px;") All
+        if categories
+          each cat in categories
+            button(data-filter=cat)= cat
+      .filter-group(data-type='status')
+        span Status:
+        button.active(data-filter='All') All
+        button(data-filter='Solved') Solved
+        button(data-filter='Unsolved') Unsolved
+    if complaints && complaints.length
+      .page
+        .grid#cardGrid
+          // Cards will be rendered by JavaScript below
+      // embed complaints for potential client-side use (no backend change)
+      script.
+        window.__COMPLAINTS = !{JSON.stringify(complaints || [])};
+        window.__NOW = !{(typeof now !== 'undefined' ? now : Date.now())};
+        window.__EMAIL = !{JSON.stringify(email || '')};
+        window.__USER_ROLE = !{JSON.stringify((typeof user !== 'undefined' && user && user.role) ? user.role : 'student')};
+        console.log('Page loaded with user info:', {
+          email: window.__EMAIL,
+          role: window.__USER_ROLE,
+          complaintsCount: window.__COMPLAINTS.length
+        });
+      // client-side renderer & filters adapted from card.html
+      script.
+        (function(){
+          var items = window.__COMPLAINTS || [];
+          var now = window.__NOW || Date.now();
+          var loggedIn = !!(window.__EMAIL);
+          var grid = document.getElementById('cardGrid');
+          if(!grid) return;
+
+          function cardTemplate(item){
+            var fallback = '/images/Campus.png';
+            var img = (item.photo && item.photo.data) ? '/complaint-image/' + item._id : ''; // use new image route
+            var title = item.category || 'Complaint';
+            var desc = item.description || '';
+            // compute time left until deletion (use server-provided 'now' when available)
+            var deletionLine = '';
+            try {
+              var expiresAt = item.expiresAt || item.expiry || item.expires || null;
+              var expireMs = expiresAt ? Number(expiresAt) : NaN;
+              if (!isNaN(expireMs)) {
+                var msLeft = expireMs - (now || Date.now());
+                if (msLeft > 0) {
+                  var secondsLeft = Math.floor(msLeft / 1000);
+                  var daysLeft = Math.floor(secondsLeft / (24 * 60 * 60));
+                  var hrsLeft = Math.floor((secondsLeft % (24 * 60 * 60)) / 3600);
+                  deletionLine = '<p><strong>Time left:</strong> ' + daysLeft + ' days ' + hrsLeft + ' hrs</p>';
+                } else {
+                  deletionLine = '<p><strong>Time left:</strong> Expired</p>';
+                }
+              }
+            } catch (e) { deletionLine = ''; }
+
+            // Check if user can access buttons
+            var currentUserEmail = window.__EMAIL || '';
+            var userRole = window.__USER_ROLE || 'public';
+            var complaintEmail = item.email || '';
+            
+            // Show buttons for: complaint creator, admin, or faculty
+            var isComplaintOwner = currentUserEmail && complaintEmail && currentUserEmail.toLowerCase() === complaintEmail.toLowerCase();
+            var isAdminOrFaculty = userRole === 'admin' || userRole === 'faculty';
+            var canAccessButtons = isComplaintOwner || isAdminOrFaculty;
+            
+            console.log('Button access check:', {
+              currentUserEmail: currentUserEmail,
+              userRole: userRole,
+              complaintEmail: complaintEmail,
+              isComplaintOwner: isComplaintOwner,
+              isAdminOrFaculty: isAdminOrFaculty,
+              canAccessButtons: canAccessButtons,
+              itemId: item._id
+            });
+
+            // Card template with conditional buttons - WITH INLINE HANDLERS FOR TESTING
+            var buttonsHtml = '';
+            if (canAccessButtons) {
+              var solveId = 'solve_' + item._id;
+              var deleteId = 'delete_' + item._id;
+              buttonsHtml = '<div class="card-actions" style="pointer-events: auto !important; z-index: 1000 !important; position: relative !important;">\n              <button type="button" id="'+solveId+'" class="solve-btn" data-id="'+item._id+'" onclick="alert(\'Solve clicked for: '+item._id+'\'); event.stopPropagation();" style="pointer-events: auto !important;">Solve<\/button>\n              <button type="button" id="'+deleteId+'" class="delete-btn" data-id="'+item._id+'" onclick="alert(\'Delete clicked for: '+item._id+'\'); event.stopPropagation();" style="pointer-events: auto !important;">Delete<\/button>\n            <\/div>';
+              console.log('Buttons HTML created for item:', item._id);
+            } else {
+              console.log('No buttons - user not logged in');
+            }
+
+            return '\n      <div class="card" data-category="'+(item.category||'')+'" data-status="'+((item.color && String(item.color).toLowerCase()==='green')? 'Solved':'Unsolved')+'">\n        <div class="card-inner">\n          <div class="card-front">\n            <img src="'+img+'" alt="'+(title.replace(/"/g,'\"'))+'" onerror="this.onerror=null;this.src=\''+fallback+'\';">\n            <div class="info">\n              <h3>'+title+'</h3>\n              <p>Click to view details</p>\n            </div>\n          </div>\n          <div class="card-back">\n            <h3>Details</h3>\n            <p><strong>Date:</strong> '+(item.date||'')+'</p>\n            <p><strong>Phone:</strong> '+(item.phone||'')+'</p>\n            <p><strong>Category:</strong> '+(item.category||'')+'</p>\n            <p><strong>Location:</strong> '+(item.location||'')+'</p>\n            <p><strong>Description:</strong> '+(desc||'')+'</p>\n            '+ deletionLine + '\n            <p class="status">Status: '+((item.color && String(item.color).toLowerCase()==='green')? 'Solved ✅':'Unsolved ❌')+'<\/p>\n            '+ buttonsHtml + '\n          <\/div>\n        <\/div>\n      <\/div>\n    ';
+          }
+
+          function renderCards(filterCategory='All', filterStatus='All'){
+            grid.innerHTML = '';
+            var filtered = items.filter(function(it){
+              var cat = (filterCategory==='All') || (it.category===filterCategory);
+              var stat = (filterStatus==='All') || ((filterStatus==='Solved') ? !!it.solved || (it.color && String(it.color).toLowerCase()==='green') : !(!!it.solved || (it.color && String(it.color).toLowerCase()==='green')));
+              return cat && stat;
+            });
+            filtered.forEach(function(it){
+              var wrap = document.createElement('div');
+              wrap.innerHTML = cardTemplate(it).trim();
+              var card = wrap.firstElementChild;
+              grid.appendChild(card);
+
+              // Wire up Solve button
+              var solveBtn = card.querySelector('.solve-btn');
+              console.log('Solve button found:', solveBtn);
+              if(solveBtn){
+                solveBtn.addEventListener('click', function(e){
+                  console.log('Solve button clicked!');
+                  e.stopPropagation();
+                  e.preventDefault();
+                  if(!loggedIn){ 
+                    alert('Please sign in to mark complaints as solved');
+                    window.location.href = '/users/signin'; 
+                    return; 
+                  }
+                  var idx = items.indexOf(it);
+                  var complaintId = it._id;
+                  console.log('Marking complaint as solved:', complaintId);
+                  fetch('/change-complaint-color', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ id: complaintId, index: idx }),
+                    credentials: 'same-origin'
+                  }).then(function(resp){
+                    if(!resp.ok){ throw new Error('Failed to mark as solved'); }
+                    items[idx].color = 'green';
+                    items[idx].solved = true;
+                    var cat = document.querySelector(".filter-group[data-type='category'] .active").dataset.filter;
+                    var stat = document.querySelector(".filter-group[data-type='status'] .active").dataset.filter;
+                    renderCards(cat, stat);
+                  }).catch(function(err){
+                    console.error('Error:', err);
+                    alert('Failed to mark complaint as solved. Please try again.');
+                  });
+                }, true);
+              } else {
+                console.log('Solve button NOT found for card');
+              }
+
+              // Wire up Delete button
+              var deleteBtn = card.querySelector('.delete-btn');
+              console.log('Delete button found:', deleteBtn);
+              if(deleteBtn){
+                deleteBtn.addEventListener('click', function(e){
+                  console.log('Delete button clicked!');
+                  e.stopPropagation();
+                  e.preventDefault();
+                  if(!loggedIn){ 
+                    alert('Please sign in to delete complaints');
+                    window.location.href = '/users/signin'; 
+                    return; 
+                  }
+                  if(!confirm('Are you sure you want to delete this complaint?')) return;
+                  var idx = items.indexOf(it);
+                  var complaintId = it._id;
+                  console.log('Deleting complaint:', complaintId);
+                  var form = document.createElement('form');
+                  form.method = 'POST';
+                  form.action = '/delete-complaint';
+                  form.style.display = 'none';
+                  var input = document.createElement('input');
+                  input.type = 'hidden';
+                  input.name = 'id';
+                  input.value = complaintId;
+                  form.appendChild(input);
+                  var input2 = document.createElement('input');
+                  input2.type = 'hidden';
+                  input2.name = 'index';
+                  input2.value = idx;
+                  form.appendChild(input2);
+                  document.body.appendChild(form);
+                  form.submit();
+                }, true);
+              } else {
+                console.log('Delete button NOT found for card');
+              }
+
+              // Card flip interaction
+              card.addEventListener('click', function(e){
+                console.log('Card clicked, target:', e.target.tagName, e.target.className);
+                var isButton = e.target.classList.contains('solve-btn') || 
+                               e.target.classList.contains('delete-btn') ||
+                               e.target.closest('.solve-btn') || 
+                               e.target.closest('.delete-btn') || 
+                               e.target.closest('.card-actions');
+                console.log('Is button?', isButton);
+                if(!isButton){
+                  card.classList.toggle('flipped');
+                  console.log('Card flipped, flipped state:', card.classList.contains('flipped'));
+                }
+              }, false);
+            });
+          }
+
+          // wire up filter buttons
+          document.querySelectorAll('.filter-group').forEach(function(group){
+            group.querySelectorAll('button').forEach(function(btn){
+              btn.addEventListener('click', function(){
+                group.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
+                btn.classList.add('active');
+                var cat = document.querySelector(".filter-group[data-type='category'] .active").dataset.filter;
+                var stat = document.querySelector(".filter-group[data-type='status'] .active").dataset.filter;
+                renderCards(cat, stat);
+              });
+            });
+          });
+
+          // initial render using server categories if present
+          renderCards();
+        })();
+    else
+      p No complaints submitted yet.
+  footer
+    p
+      | © 2025 Secure My Campus |
+      a(href="#") Privacy Policy
+      |  |
+      a(href="/faqs") FAQs
+    script(src="/javascripts/complaint_timer.js")
+

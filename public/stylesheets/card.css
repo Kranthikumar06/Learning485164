@@ -1,0 +1,269 @@
+  /* Keep only page layout here; global navbar/background come from style.css */
+  .page{ max-width:1100px; margin: 24px auto; padding: 20px; box-sizing: border-box; }
+
+  /* Ensure centered grid inside .page */
+  .page .grid{ margin: 10px auto; }s
+  /* Vertical navbar for complaint page only */
+  .navbar.vertical{
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative; /* keep it in flow */
+    padding: 18px 20px;
+    gap: 12px;
+  }
+  .navbar.vertical .logo-container{ margin-bottom: 8px }
+  .navbar.vertical .nav-links{ flex-direction: column; gap: 8px; }
+  .navbar.vertical .profile-top-right{ position: relative; top: auto; right: auto; }
+
+  /* Filter bar — pill containers with inner pills */
+  .filter-bar{
+    display:flex; gap:20px; margin:100px auto 28px; justify-content:center; align-items:center; max-width:1100px;
+  }
+
+  /* reduce vertical spacing on narrow screens */
+  @media (max-width: 640px) {
+    .filter-bar{ margin:36px auto 20px; padding: 0 12px; }
+  }
+  .filter-group{
+    background: #e5e6e7; padding:12px 16px; border-radius:18px; box-shadow: 0 8px 22px rgba(15,23,42,0.06);
+    display:flex; align-items:center; gap:12px;
+  }
+  .filter-group span{ font-weight:800; color:#6b21a8; margin-right:8px }
+  /* Style plain <button> elements in the filter group as pills (no extra class needed) */
+  .filter-group button{
+    display:inline-flex; align-items:center; justify-content:center; padding:8px 14px; border-radius:999px; cursor:pointer;
+    background:#f8fafc; color:#111827; font-weight:700; font-size:14px; box-shadow: 0 2px 8px rgba(2,6,23,0.06); border: none;
+    transition: transform .12s ease, box-shadow .16s ease, background .16s ease;
+  }
+  .filter-group button + button{ margin-left:8px }
+  .filter-group button:hover{ transform: translateY(-2px); filter:brightness(.98) }
+  .filter-group button.active{ background:#5b21b6; color:#fff; box-shadow: 0 10px 28px rgba(91,33,182,0.15); }
+  /* stronger hover for the selected pill to make it obvious */
+  .filter-group button.active:hover{ transform: translateY(-3px) scale(1.03); box-shadow: 0 16px 36px rgba(91,33,182,0.22); }
+
+  /* Grid - Fixed card sizes for consistency - 3 columns */
+  .grid{
+    display: grid;
+    gap: 28px;
+    grid-template-columns: repeat(3, 420px);
+    justify-content: center;
+  }
+  @media (max-width: 1400px){
+    .grid{
+      grid-template-columns: repeat(3, 360px);
+    }
+  }
+  @media (max-width: 1200px){
+    .grid{
+      grid-template-columns: repeat(2, 380px);
+    }
+  }
+  @media (max-width: 768px){
+    .grid{
+      grid-template-columns: repeat(2, 280px);
+    }
+  }
+  @media (max-width: 640px){
+    .grid{
+      grid-template-columns: 1fr;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+  }
+
+  /* Card flip - Fixed dimensions */
+  .card{
+    perspective: 1000px;
+    width: 100%;
+    max-width: 420px;
+  }
+  .card-inner{
+    position: relative;
+    width: 100%;
+    height: 390px; /* Increased height by 50px more (340 + 50) */
+    transform-style: preserve-3d;
+    transition: transform .8s ease-in-out;
+  }
+  
+  .card{
+    cursor: pointer;
+  }
+  
+  .card.flipped .card-inner{ transform: rotateY(180deg); }
+
+  .card-front, .card-back{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,.18);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  .card-front {
+    position: absolute;
+    z-index: 2;
+  }
+  .card-back{
+    background:#fff; transform: rotateY(180deg);
+    display:flex; flex-direction:column; padding:18px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    cursor: pointer;
+    z-index: 1;
+  }
+  
+  /* When flipped, card-back should be on top */
+  .card.flipped .card-front {
+    z-index: 1;
+  }
+  
+  .card.flipped .card-back {
+    z-index: 2;
+  }
+  .card-front img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .5s ease;
+  }
+  .card-front:hover img{ transform: scale(1.05); }
+  
+  /* Overlay gradient for better text readability */
+  .card-front::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,0.7) 100%);
+    z-index: 1;
+    transition: background 0.3s ease;
+  }
+  
+  .card-front:hover::before {
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 70%, rgba(0,0,0,0.8) 100%);
+  }
+  
+  .card-front .info{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 24px;
+    color: #fff;
+    z-index: 2;
+    background: transparent;
+  }
+  .card-front .info h3{
+    margin: 0 0 8px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  }
+  
+  .card-front .info p {
+    margin: 0;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 400;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Custom scrollbar for card back */
+  .card-back::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .card-back::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+  }
+
+  .card-back::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 4px;
+    border: 2px solid #f1f5f9;
+  }
+
+  .card-back::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+  }
+
+  /* Firefox scrollbar */
+  .card-back {
+    scrollbar-width: thin;
+    scrollbar-color: #94a3b8 #f1f5f9;
+  }
+  
+  .card-back h3{ margin:0 0 10px; color:#6b21a8; font-size:22px; font-weight:800; display:flex; align-items:center; gap:8px; }
+  .card-back p{ margin:6px 0; color:#374151; }
+  .card-back .status{ margin-top:8px; font-weight:700; }
+
+  /* Actions container for multiple buttons */
+  .card-actions{ 
+    display:flex; 
+    gap:10px; 
+    margin-top:auto;
+    position: relative;
+    z-index: 100;
+    pointer-events: auto;
+  }
+  
+  /* Button base styles */
+  .card-back .card-actions button,
+  .card-back .card-actions .solve-btn, 
+  .card-back .card-actions .delete-btn{
+    padding:10px 18px; 
+    border:none; 
+    border-radius:12px; 
+    color:#fff !important; 
+    font-weight:700;
+    font-size: 14px;
+    cursor: pointer !important;
+    position: relative;
+    z-index: 101;
+    pointer-events: auto !important;
+    transition: all 0.3s ease !important;
+    box-shadow:0 6px 16px rgba(107,33,168,.25);
+  }
+  
+  /* Solve button colors */
+  .card-back .card-actions .solve-btn{
+    background:#6b21a8 !important;
+    box-shadow:0 6px 16px rgba(107,33,168,.25) !important;
+  }
+  
+  /* Delete button colors */
+  .card-back .card-actions .delete-btn{ 
+    background:#dc2626 !important; 
+    box-shadow:0 6px 16px rgba(220,38,38,.25) !important;
+  }
+  
+  /* Solve button hover */
+  .card-back .card-actions .solve-btn:hover{ 
+    background:#7c3aed !important;
+    transform: translateY(-3px) scale(1.05) !important;
+    box-shadow:0 10px 25px rgba(124,58,237,.4) !important;
+  }
+  
+  /* Delete button hover */
+  .card-back .card-actions .delete-btn:hover{ 
+    background:#ef4444 !important;
+    transform: translateY(-3px) scale(1.05) !important;
+    box-shadow:0 10px 25px rgba(239,68,68,.4) !important;
+  }
+  
+  /* Active states (when clicked) */
+  .card-back .card-actions .solve-btn:active{ 
+    transform: translateY(-1px) scale(1.02) !important;
+    box-shadow:0 4px 12px rgba(107,33,168,.3) !important;
+  }
+  
+  .card-back .card-actions .delete-btn:active{ 
+    transform: translateY(-1px) scale(1.02) !important;
+    box-shadow:0 4px 12px rgba(220,38,38,.3) !important;
+  }
+

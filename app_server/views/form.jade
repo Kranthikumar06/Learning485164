@@ -1,0 +1,71 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Secure My Campus - Complaint Box
+    link(href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap", rel="stylesheet")
+    link(rel="stylesheet", href="/stylesheets/complaint_box.css")
+    style.
+      input[type="date"] {
+        cursor: pointer !important;
+      }
+      input[type="date"]::-webkit-calendar-picker-indicator {
+        cursor: pointer !important;
+      }
+  body
+    // Navbar
+      
+    // Content
+    .content
+      .profile-top-right
+
+      .form-container
+        h1 Report an Issue
+        form(action="/submit-incident", method="post", enctype="multipart/form-data")
+          label(for="name") Name
+          input(type="text", id="name", name="name", required=true)
+          label(for="email") Email
+          //- Prefill from server context; readonly to prevent mismatch with authenticated user
+          input(type="email", id="email", name="email", required=true, value=email || '', readonly=true)
+          label(for="phone") Phone Number
+          input(type="tel", id="phone", name="phone", required=true, pattern="[0-9]{10}")
+          label(for="date") Date
+          input(type="date", id="date", name="date", required=true)
+          label(for="category") Complaint Type
+          select(id="category", name="category", required=true)
+            option(value="") -- Select Complaint Type --
+            option(value="harassment") Harassment
+            option(value="food") Food Issue
+            option(value="lost") Lost and Found
+            option(value="hostel") Hostel Issue
+          label(for="location") Location
+          input(type="text", id="location", name="location", required=true)
+          label(for="description") Description
+          textarea(id="description", name="description", required=true)
+          label(for="photo") Upload Photos
+          input(type="file", id="photo", name="photo", accept="image/*", multiple=true, required=false)
+          button(type="submit", class="submit-btn")
+            span Submit Complaint
+    // Footer
+    footer
+      p © 2025 Secure My Campus | 
+        a(href="#") Privacy Policy
+        | 
+        a(href="/faqs") FAQs
+
+    script.
+      // Set date input to allow today and yesterday only
+      document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.getElementById('date');
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        const todayStr = today.toISOString().split('T')[0];
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        
+        dateInput.setAttribute('min', yesterdayStr);
+        dateInput.setAttribute('max', todayStr);
+        dateInput.value = todayStr; // Set default value to today
+      });

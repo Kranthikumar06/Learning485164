@@ -1,0 +1,152 @@
+extends layout
+
+block head
+  link(href='https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap', rel='stylesheet')
+  link(rel='stylesheet', href='/stylesheets/home.css')
+
+block content
+  header.navbar
+    .navbar-left
+      .logo-container
+        img(src="/images/Campus.png", alt="Secure My Campus Logo")
+        div
+          span Secure
+          span My Campus
+      button#mobileMenuBtn.navbar-toggle
+        span
+        span
+        span
+      nav.nav-links
+        a(href="/") Home
+        a(href="/complaint") Complaint Box
+        if email
+          a(href="/dashboard") Dashboard
+          a(href="/faqs") FAQs
+        else
+          a(href="/users/signup") Sign Up
+          a(href="/users/signin") Sign In
+    .navbar-right
+      .avatar-wrap
+        if email
+          a(href="/profile", title="Profile")
+            if user && user.photo && user.photo.data
+              img.avatar(src='/profile-image/' + user._id, alt="Profile Photo")
+            else
+              img.avatar(src="/images/profile.png", alt="Profile")
+  
+  // Hero Section
+  section.hero(style="padding-right: 200px; padding-left: 200px;")
+    .hero-content
+      h1 Welcome to 
+        span Secure My Campus
+      p Empowering students and faculty to report, resolve, and stay connected. Whether it's lost items, harassment, or food issues — we're here to ensure your campus stays safe and supportive.
+      if email
+        a(href='/form', target='_blank') Report an Issue
+      else
+        a(href='/users/signin') Report an Issue
+    .hero-img
+      img(src='https://i.pinimg.com/1200x/e2/1c/c1/e21cc1831124f2c7cc9d6383920d0aa1.jpg', alt='Campus Image')
+  
+  if latestComplaint
+    section.announcement-section
+      .announcement-container
+        .announcement-box
+          h2.announcement-title 
+            span.announcement-icon 📢
+            | Announcements
+          .announcement-content
+            span.announcement-category #{latestComplaint.category}
+            span.announcement-separator :
+            span.announcement-description #{latestComplaint.description}
+  
+  // Overview
+  section.overview(style="padding-left: 300px; padding-right: 300px;")
+    h2 About Secure My Campus
+    p Secure My Campus is a comprehensive platform designed to enhance safety, transparency, and communication on college campuses. It enables students and staff to report issues—including maintenance, safety concerns, and harassment—and monitor their resolution in real time. The platform also features a smart Lost & Found system and secure administrative tools for efficient management. By streamlining communication and accountability, it fosters a responsive and well-organized campus environment. Accessible, reliable, and user-friendly, Secure My Campus ensures a safer and more connected campus experience.
+
+  // Stats Section
+  section.stats(style="padding-right: 130px; padding-left: 130px; padding-top: 90px; padding-bottom: 90px;")
+    .stats-container
+      .stat-box
+        h3 #{stats.totalUsers} +
+        p Students actively using Secure My Campus to report and resolve issues.
+      .stat-box
+        h3 #{stats.solvedComplaints} +
+        p Complaints successfully resolved by campus authorities.
+      .stat-box
+        h3 #{stats.averageRating} %
+        p Overall success rate in resolving student concerns and feedback.
+      .stat-box
+        h3 #{stats.appreciationCount} +
+        p Positive responses from students appreciating faster complaint actions.
+
+  // Features
+  section.features(style="padding-left: 400px; padding-right: 400px; padding-top: 50px; padding-bottom: 50px;")
+    h2 Our Key Features
+    .feature-grid
+      .feature-card
+        h3 Lost & Found Portal
+        p Quickly post or search for lost and found items in your campus community.
+      .feature-card
+        h3 Complaint Management
+        p File complaints easily and track their progress until they're resolved.
+      .feature-card
+        h3 Faculty Dashboard
+        p Authorized faculty can monitor, verify, and resolve student issues efficiently.
+      .feature-card
+        h3 Real-Time Updates
+        p Stay notified with live updates on complaint resolution and new announcements.
+
+  // Contact
+  section.contact(style="padding: 30px 400px; padding-right: 400px; padding-left: 400px;")
+    h2 Need Help?
+    p Have a question or suggestion? Reach out to our support team — we're always happy to help you improve your campus experience.
+    p(style="font-weight: bold;") Contact Us
+    p securemycampus485164@gmail.com
+
+  // Social Media Section
+  section.social-media(style="padding: 60px 500px 40px; text-align: center; background: #fff;")
+    p.social-heading(style="font-size: 13px; color: #999; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 15px; font-weight: 500;") WE ARE SOCIAL
+    h2(style="font-size: 36px; color: #333; margin-bottom: 50px; font-weight: 600;") Follow us on social media
+    .social-icons(style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; max-width: 600px; margin: 0 auto 50px;")
+      a.social-icon(href='#', target='_blank', style="display: inline-flex; width: 85px; height: 85px; border-radius: 20px; align-items: center; justify-content: center; transition: transform 0.3s ease, box-shadow 0.3s ease; background: #d6ecf9; box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);", title="LinkedIn")
+        img(src="https://cdn-icons-png.flaticon.com/512/174/174857.png", alt="LinkedIn", style="width: 38px; height: 38px;")
+      a.social-icon(href='#', target='_blank', style="display: inline-flex; width: 85px; height: 85px; border-radius: 20px; align-items: center; justify-content: center; transition: transform 0.3s ease, box-shadow 0.3s ease; background: #d4d6f0; box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);", title="Facebook")
+        img(src="https://cdn-icons-png.flaticon.com/512/733/733547.png", alt="Facebook", style="width: 38px; height: 38px;")
+      a.social-icon(href='#', target='_blank', style="display: inline-flex; width: 85px; height: 85px; border-radius: 20px; align-items: center; justify-content: center; transition: transform 0.3s ease, box-shadow 0.3s ease; background: #fcd7d9; box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);", title="Instagram")
+        img(src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png", alt="Instagram", style="width: 38px; height: 38px;")
+      a.social-icon(href='mailto:support@securemycampus.com', style="display: inline-flex; width: 85px; height: 85px; border-radius: 20px; align-items: center; justify-content: center; transition: transform 0.3s ease, box-shadow 0.3s ease; background: #fef7cd; box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);", title="Email")
+        img(src="https://cdn-icons-png.flaticon.com/512/732/732200.png", alt="Email", style="width: 38px; height: 38px;")
+    
+    // Footer inside social section
+    p(style="font-size: 14px; color: #888; margin-top: 30px;") © 2025 Secure My Campus | 
+      a(href='#', style="color: #007bff; text-decoration: none;") Privacy Policy
+      |  | 
+      a(href='/faqs', style="color: #007bff; text-decoration: none;") FAQs
+  
+  script.
+    // Mobile menu toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const navLinks = document.querySelector('.nav-links');
+      
+      if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', function() {
+          navLinks.classList.toggle('show');
+          this.classList.toggle('active');
+        });
+      }
+      
+      // Social media icons hover effect
+      const socialIcons = document.querySelectorAll('.social-icon');
+      socialIcons.forEach(icon => {
+        icon.addEventListener('mouseenter', function() {
+          this.style.transform = 'translateY(-5px)';
+          this.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+        });
+        icon.addEventListener('mouseleave', function() {
+          this.style.transform = 'translateY(0)';
+          this.style.boxShadow = this.getAttribute('data-shadow') || '0 4px 15px rgba(0, 0, 0, 0.1)';
+        });
+      });
+    });
