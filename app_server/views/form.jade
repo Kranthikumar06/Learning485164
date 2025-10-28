@@ -29,7 +29,7 @@ html(lang="en")
           //- Prefill from server context; readonly to prevent mismatch with authenticated user
           input(type="email", id="email", name="email", required=true, value=email || '', readonly=true)
           label(for="phone") Phone Number
-          input(type="tel", id="phone", name="phone", required=true, pattern="[0-9]{10}")
+          input(type="tel", id="phone", name="phone", required=true, pattern="[0-9]{10}", placeholder="Enter 10-digit phone number")
           label(for="date") Date
           input(type="date", id="date", name="date", required=true)
           label(for="category") Complaint Type
@@ -46,7 +46,7 @@ html(lang="en")
           label(for="photo") Upload Photos
           input(type="file", id="photo", name="photo", accept="image/*", multiple=true, required=false)
           button(type="submit", class="submit-btn")
-            span Submit Complaint
+            span Submit 
     // Footer
     footer
       p © 2025 Secure My Campus | 

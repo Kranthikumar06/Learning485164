@@ -63,7 +63,7 @@ router.get('/edit-profile', function(req, res) {
   User.findOne({ email: user.email }).then(dbUser => {
     res.render('edit_profile', {
       title: 'Edit Profile',
-      name: dbUser ? dbUser.name : user.name,
+      username: dbUser ? dbUser.username : user.username,
       email: dbUser ? dbUser.email : user.email,
       location: dbUser ? dbUser.location : '',
       phone: dbUser ? dbUser.phone : '',
@@ -104,10 +104,12 @@ router.post('/edit-profile', upload.single('photo'), async function(req, res) {
   }
 
   const { name, location, phone, password, confirm_password } = req.body;
+  const { username } = req.body;
+  
   try {
-    // Prepare update object
+    // Prepare update object (email is NOT editable, but username can be changed)
     let updateObj = { 
-      name, 
+      username,
       location, 
       phone,
       role: dbUser.role // Preserve the existing role
@@ -123,7 +125,7 @@ router.post('/edit-profile', upload.single('photo'), async function(req, res) {
 
     if (password && password.length > 0) {
       if (password !== confirm_password) {
-        return res.render('edit_profile', { title: 'Edit Profile', error: 'Passwords must match.', user: dbUser, name, email: user.email, location, phone });
+        return res.render('edit_profile', { title: 'Edit Profile', error: 'Passwords must match.', user: dbUser, username: username || dbUser.username, email: user.email, location, phone });
       }
       const hashed = await bcrypt.hash(password, 10);
       updateObj.password = hashed;
@@ -338,10 +340,12 @@ router.get('/auth/google/callback',
       
       if (!dbUser) {
         const verificationToken = require('crypto').randomBytes(32).toString('hex');
+        // Extract username from email (part before @)
+        const username = email.split('@')[0];
         dbUser = new User({
           name: googleUser.displayName,
           email,
-          username: googleUser.id,
+          username: username,
           phone: '',
           role: role,
           isVerified: false,
@@ -366,11 +370,7 @@ router.get('/auth/google/callback',
           console.error('Error sending verification email:', error);
         }
         
-        return res.render('signin', { 
-          title: 'Sign In', 
-          success: 'A verification link has been sent to your email. Please verify before signing in.', 
-          email: email 
-        });
+        return res.redirect('/users/signin?verificationSent=true&email=' + encodeURIComponent(email));
       }
 
       if (!dbUser.isVerified) {
@@ -396,11 +396,7 @@ router.get('/auth/google/callback',
           console.error('Error sending verification email:', error);
         }
 
-        return res.render('signin', { 
-          title: 'Sign In', 
-          success: 'A verification link has been sent to your email. Please verify before signing in.', 
-          email: email 
-        });
+        return res.redirect('/users/signin?verificationSent=true&email=' + encodeURIComponent(email));
       }
 
       // Only verified users reach here
@@ -635,7 +631,7 @@ router.post('/signup', async function(req, res) {
       .catch((error) => {
         console.error('Error sending verification email:', error);
       });
-    res.redirect('/users/signin');
+    res.redirect('/users/signin?verificationSent=true&email=' + encodeURIComponent(email));
   } catch (err) {
     return res.render('signup', { title: 'Sign Up', error: 'Error creating user: ' + err.message, email });
   }

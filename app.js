@@ -50,10 +50,13 @@ passport.use(new GoogleStrategy({
         }
       }
 
+      // Extract username from email (part before @)
+      const username = email.split('@')[0];
+      
       const newUser = new User({
         name: profile.displayName,
         email: email,
-        username: profile.id,
+        username: username,
         phone: '',
         password: '', // No password for Google users
         role: role,

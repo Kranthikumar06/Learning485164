@@ -10,7 +10,7 @@ block content
           span My Campus
       nav.nav-links
         a(href="/") Home
-        a(href="/complaint") Complaint Box
+        a(href="/complaint") Complaints
         a(href="/users/signup") Sign Up
         a(href="/users/signin") Sign In
   .content
@@ -44,6 +44,23 @@ block content
       a(href="#") Privacy Policy
       |  | 
       a(href="/faqs") FAQs
+
+  script(src="/javascripts/notification.js")
+  script.
+    // Check if user just signed up and show verification notification
+    const urlParams = new URLSearchParams(window.location.search);
+    const verificationSent = urlParams.get('verificationSent');
+    const email = urlParams.get('email');
+    
+    if (verificationSent === 'true' && email) {
+      // Wait a moment for page to load
+      setTimeout(() => {
+        showVerificationEmailSent(email);
+        // Clean up URL without reloading
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }, 500);
+    }
 
   style.
     .google-icon:hover {

@@ -71,14 +71,12 @@ body {
 
 .logo-container div span:first-child {
   font-size: 20px;
-  font-weight: bold;
   color: #007bff;
   line-height: 1.2;
 }
 
 .logo-container div span:last-child {
   font-size: 14px;
-  font-weight: normal;
   color: #333;
   line-height: 1.2;
 }
